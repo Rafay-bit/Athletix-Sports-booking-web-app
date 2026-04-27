@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATHLETIX - Interactive React Login</title>
+
+    <!-- React & Babel via CDN -->
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Google Fonts for EA FC Vibe -->
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;600;700&display=swap"
+        rel="stylesheet">
+
+    <style>
+        :root {
+            --bg-base: #0b0f19;
+            --accent-green: #39ff14;
+            --accent-green-hover: #4aff26;
+            --mouse-x: 50%;
+            --mouse-y: 50%;
+        }
+
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-base);
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+            color: white;
+        }
+
+        /* ── Main Layout ── */
+        .login-container {
+            position: relative;
+            min-height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ── Dynamic Liquid Background ── */
+        .background-layer {
+            position: absolute;
+            inset: 0;
+            overflow: hidden;
+            pointer-events: none;
+            z-index: 0;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.8), rgba(11, 15, 25, 0.9));
+        }
+
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(120px);
+            opacity: 0.6;
+        }
+
+        .blob-1 {
+            background-color: var(--accent-green);
+            width: 500px;
+            height: 500px;
+            top: -10%;
+            left: -10%;
+            animation: float1 15s ease-in-out infinite alternate;
+        }
+
+        .blob-2 {
+            background-color: #0066ff;
+            width: 600px;
+            height: 600px;
+            bottom: -20%;
+            right: -10%;
+            animation: float2 20s ease-in-out infinite alternate;
+        }
+
+        .blob-3 {
+            background-color: #00ffff;
+            width: 400px;
+            height: 400px;
+            /* Driven by React useEffect variables */
+            left: var(--mouse-x);
+            top: var(--mouse-y);
+            transform: translate(-50%, -50%);
+            /* Smooth spring-like transition for mouse follow */
+            transition: left 0.4s cubic-bezier(0.1, 0.8, 0.2, 1), top 0.4s cubic-bezier(0.1, 0.8, 0.2, 1);
+            opacity: 0.4;
+        }
+
+        @keyframes float1 {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+
+            100% {
+                transform: translate(15vw, 15vh) scale(1.1);
+            }
+        }
+
+        @keyframes float2 {
+            0% {
+                transform: translate(0, 0) scale(1.1);
+            }
+
+            100% {
+                transform: translate(-20vw, -10vh) scale(1);
+            }
+        }
+
+        /* ── Foreground Elements (z-index: 1) ── */
+        .foreground-layer {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 440px;
+            padding: 0 24px;
+            box-sizing: border-box;
+        }
+
+        .header-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 5rem;
+            letter-spacing: 8px;
+            margin: 0 0 40px 0;
+            text-transform: uppercase;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        /* ── Glassmorphism Login Card ── */
+        .login-card {
+            background: rgba(20, 25, 40, 0.4);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 48px;
+            width: 100%;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.02);
+            box-sizing: border-box;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+            width: 100%;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            outline: none;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.3);
+            font-weight: 400;
+        }
+
+        .form-input:focus {
+            border-color: var(--accent-green);
+            background: rgba(0, 0, 0, 0.7);
+            box-shadow: 0 0 16px rgba(57, 255, 20, 0.15);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background-color: var(--accent-green);
+            color: black;
+            border: none;
+            border-radius: 12px;
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 1.4rem;
+            letter-spacing: 3px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+            margin-top: 8px;
+        }
+
+        .submit-btn:hover {
+            background-color: var(--accent-green-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(57, 255, 20, 0.3);
+        }
+
+        .submit-btn:active {
+            transform: scale(0.96);
+        }
+
+        .error-message {
+            background: rgba(255, 59, 48, 0.15);
+            border: 1px solid rgba(255, 59, 48, 0.4);
+            color: #ff3b30;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.9rem;
+            box-sizing: border-box;
+        }
+
+        /* ── Footer ── */
+        .footer-text {
+            margin-top: 32px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            text-align: center;
+            font-weight: 400;
+        }
+
+        .neon-text {
+            color: var(--accent-green);
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function AthletixReactLogin() {
+            // State for dynamic tracking of mouse (liquid blob #3)
+            const [mousePos, setMousePos] = useState({ x: '50%', y: '50%' });
+
+            // Auth State
+            const [username, setUsername] = useState('');
+            const [password, setPassword] = useState('');
+            const [error, setError] = useState('');
+            const [loading, setLoading] = useState(false);
+
+            // React useEffect to listen to mousemove on the window
+            useEffect(() => {
+                const handleMouseMove = (e) => {
+                    // Update variables safely without thrashing the DOM layout (uses transform down the line)
+                    setMousePos({ x: `${e.clientX}px`, y: `${e.clientY}px` });
+                };
+
+                window.addEventListener('mousemove', handleMouseMove);
+
+                // Cleanup listener on component unmount
+                return () => window.removeEventListener('mousemove', handleMouseMove);
+            }, []);
+
+            const handleLogin = async (e) => {
+                e.preventDefault();
+                setError('');
+                setLoading(true);
+
+                try {
+                    const response = await fetch('/api/auth/login', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, password })
+                    });
+                    const data = await response.json();
+
+                    if (data.success) {
+                        if (data.role === 'Admin') {
+                            window.location.href = '/admin.html';
+                        } else {
+                            window.location.href = '/dashboard.html';
+                        }
+                    } else {
+                        setError(data.error || 'Login failed');
+                    }
+                } catch (err) {
+                    setError('Server connection failed. Please check network.');
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            return (
+                <div
+                    className="login-container"
+                    // Inject CSS Variables for dynamic blob 3 tracking
+                    style={{ '--mouse-x': mousePos.x, '--mouse-y': mousePos.y }}
+                >
+                    {/* Layer 0: Liquid Heatmap Background */}
+                    <div className="background-layer">
+                        <div className="blob blob-1"></div>
+                        <div className="blob blob-2"></div>
+                        <div className="blob blob-3"></div>
+                    </div>
+
+                    {/* Layer 1: Interactive Foreground */}
+                    <div className="foreground-layer">
+                        {/* Header Title */}
+                        <h1 className="header-title">ATHLETIX</h1>
+
+                        {/* Glassmorphism Login Card */}
+                        <div className="login-card">
+                            {error && <div className="error-message">{error}</div>}
+
+                            <form onSubmit={handleLogin}>
+                                {/* Username Input */}
+                                <div className="form-group">
+                                    <input
+                                        type="text"
+                                        className="form-input"
+                                        placeholder="Username"
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
+                                        autoFocus
+                                        required
+                                    />
+                                </div>
+
+                                {/* Password Input */}
+                                <div className="form-group">
+                                    <input
+                                        type="password"
+                                        className="form-input"
+                                        placeholder="Password"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                    />
+                                </div>
+
+                                {/* Sign In Button */}
+                                <button type="submit" className="submit-btn" disabled={loading}>
+                                    {loading ? 'AUTHENTICATING...' : 'SIGN IN'}
+                                </button>
+                            </form>
+
+                            {/* Footer Muted Text */}
+                            <div className="footer-text">
+                                All accounts use password: <span className="neon-text">1234</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AthletixReactLogin />);
+    </script>
+</body>
+
+</html>

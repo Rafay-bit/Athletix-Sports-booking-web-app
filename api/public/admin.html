@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATHLETIX — Admin Panel</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- SIDEBAR -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>ATHLETIX</h2>
+                <div class="sub">Admin Panel</div>
+            </div>
+            <div class="sidebar-user">
+                <div class="sidebar-avatar" id="userAvatar"
+                    style="background:linear-gradient(135deg,var(--accent-gold),#8B6914)"></div>
+                <div class="sidebar-user-info">
+                    <div class="name" id="userName"></div>
+                    <div class="role" id="userRole"></div>
+                </div>
+            </div>
+            <div class="sidebar-nav">
+                <div class="nav-item active" data-section="overview"><span class="icon">📊</span> Overview</div>
+                <div class="nav-item" data-section="bookings"><span class="icon">📋</span> All Bookings</div>
+                <div class="nav-item" data-section="users"><span class="icon">👥</span> Users</div>
+                <div class="nav-item" data-section="analytics"><span class="icon">📈</span> Analytics</div>
+                <div class="nav-item" data-section="facilities"><span class="icon">🏟️</span> Facility Health</div>
+                <div class="nav-item" data-section="auditlog"><span class="icon">🔒</span> Audit Logs</div>
+            </div>
+            <div class="sidebar-footer">
+                <button class="btn-logout" id="logoutBtn">⏻ LOGOUT</button>
+            </div>
+        </nav>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <!-- ═══ OVERVIEW ═══ -->
+            <div class="section active" id="sec-overview">
+                <div class="section-header">
+                    <h2>Dashboard Overview</h2>
+                    <p>System-wide metrics at a glance</p>
+                </div>
+                <div class="stats-grid" id="statsGrid"></div>
+
+                <div class="grid-2">
+                    <div class="panel stagger-5">
+                        <div class="panel-header">
+                            <h3>Top Facilities</h3>
+                        </div>
+                        <div class="bar-chart" id="topFacilitiesChart"></div>
+                    </div>
+                    <div class="panel stagger-6">
+                        <div class="panel-header">
+                            <h3>Peak Usage Hours</h3>
+                        </div>
+                        <div class="bar-chart" id="peakHoursChart"></div>
+                    </div>
+                </div>
+
+                <div class="panel stagger-7">
+                    <div class="panel-header">
+                        <h3>Power Users</h3><span class="text-xs text-muted text-upper">Top 10 by bookings</span>
+                    </div>
+                    <div class="table-wrap" style="border:none;margin:0">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>User</th>
+                                    <th>Total Bookings</th>
+                                </tr>
+                            </thead>
+                            <tbody id="powerUsersBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ ALL BOOKINGS ═══ -->
+            <div class="section" id="sec-bookings">
+                <div class="section-header">
+                    <h2>All Bookings</h2>
+                    <p>Complete booking registry across all facilities</p>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Facility</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="allBookingsBody">
+                            <tr>
+                                <td colspan="7" class="text-center text-muted" style="padding:40px">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ═══ USERS ═══ -->
+            <div class="section" id="sec-users">
+                <div class="section-header">
+                    <h2>Registered Users</h2>
+                    <p>All system users — students, staff, and admins</p>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Membership</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersBody">
+                            <tr>
+                                <td colspan="7" class="text-center text-muted" style="padding:40px">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ═══ ANALYTICS ═══ -->
+            <div class="section" id="sec-analytics">
+                <div class="section-header">
+                    <h2>Revenue &amp; Ratings</h2>
+                    <p>Financial metrics and facility feedback analytics</p>
+                </div>
+                <div class="panel stagger-1">
+                    <div class="panel-header">
+                        <h3>Monthly Revenue</h3>
+                    </div>
+                    <div class="bar-chart" id="revenueChart"></div>
+                </div>
+                <div class="panel stagger-3">
+                    <div class="panel-header">
+                        <h3>Facility Ratings</h3>
+                    </div>
+                    <div class="bar-chart" id="ratingsChart"></div>
+                </div>
+            </div>
+
+            <!-- ═══ FACILITY HEALTH ═══ -->
+            <div class="section" id="sec-facilities">
+                <div class="section-header">
+                    <h2>Facility Health Report</h2>
+                    <p>Maintenance days vs. active booking days comparison</p>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Facility</th>
+                                <th>Booking Days</th>
+                                <th>Maintenance Days</th>
+                                <th>Health Ratio</th>
+                            </tr>
+                        </thead>
+                        <tbody id="healthBody">
+                            <tr>
+                                <td colspan="4" class="text-center text-muted" style="padding:40px">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ═══ AUDIT LOGS ═══ -->
+            <div class="section" id="sec-auditlog">
+                <div class="section-header">
+                    <h2>Audit Logs</h2>
+                    <p>Administrative action history</p>
+                </div>
+                <div class="notif-list" id="auditList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="/js/admin.js"></script>
+</body>
+
+</html>

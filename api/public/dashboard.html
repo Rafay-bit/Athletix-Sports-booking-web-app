@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ATHLETIX — Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <div class="app-layout">
+        <!-- SIDEBAR -->
+        <nav class="sidebar">
+            <div class="sidebar-header">
+                <h2>ATHLETIX</h2>
+                <div class="sub">Lahore</div>
+            </div>
+            <div class="sidebar-user">
+                <div class="sidebar-avatar" id="userAvatar"></div>
+                <div class="sidebar-user-info">
+                    <div class="name" id="userName"></div>
+                    <div class="role" id="userRole"></div>
+                </div>
+            </div>
+            <div class="sidebar-nav">
+                <div class="nav-item active" data-section="facilities"><span class="icon">🏟️</span> Facilities</div>
+                <div class="nav-item" data-section="bookings"><span class="icon">📋</span> My Bookings</div>
+                <div class="nav-item" data-section="availability"><span class="icon">🔍</span> Search Slots</div>
+                <div class="nav-item" data-section="auctions"><span class="icon">⚡</span> Auctions</div>
+                <div class="nav-item" data-section="equipment"><span class="icon">🎾</span> Equipment</div>
+                <div class="nav-item" data-section="notifications"><span class="icon">🔔</span> Notifications</div>
+            </div>
+            <div class="sidebar-footer">
+                <button class="btn-logout" id="logoutBtn">⏻ LOGOUT</button>
+            </div>
+        </nav>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+
+            <!-- ═══ FACILITIES SECTION ═══ -->
+            <div class="section active" id="sec-facilities">
+                <div class="section-header">
+                    <h2>Facilities</h2>
+                    <p>Browse all Lahore sports venues available for booking</p>
+                </div>
+                <div class="facility-grid" id="facilityGrid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ MY BOOKINGS SECTION ═══ -->
+            <div class="section" id="sec-bookings">
+                <div class="section-header">
+                    <h2>My Bookings</h2>
+                    <p>Your current and past facility reservations</p>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Facility</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookingsTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center text-muted" style="padding:40px">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ═══ SEARCH AVAILABILITY ═══ -->
+            <div class="section" id="sec-availability">
+                <div class="section-header">
+                    <h2>Search Available Slots</h2>
+                    <p>Find open facility + timeslot combinations for a specific date</p>
+                </div>
+                <div class="search-bar">
+                    <input type="date" id="searchDate" class="form-input">
+                    <button class="btn btn-gold btn-sm" id="searchBtn">SEARCH</button>
+                </div>
+                <div id="availabilityResults">
+                    <div class="empty-state">
+                        <div class="icon">🔍</div>
+                        <p>Select a date to search for available slots</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ AUCTIONS SECTION ═══ -->
+            <div class="section" id="sec-auctions">
+                <div class="section-header">
+                    <h2>Live Auctions</h2>
+                    <p>Active bidding sessions for premium venue slots</p>
+                </div>
+                <div class="auction-grid" id="auctionGrid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ EQUIPMENT SECTION ═══ -->
+            <div class="section" id="sec-equipment">
+                <div class="section-header">
+                    <h2>Equipment</h2>
+                    <p>Rental gear availability and rates</p>
+                </div>
+                <div class="facility-grid" id="equipmentGrid">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ═══ NOTIFICATIONS SECTION ═══ -->
+            <div class="section" id="sec-notifications">
+                <div class="section-header">
+                    <h2>Notifications</h2>
+                    <p>Alerts, reminders, and system messages</p>
+                </div>
+                <div class="notif-list" id="notifList">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <script src="/js/dashboard.js"></script>
+</body>
+
+</html>
