@@ -289,11 +289,12 @@
                     const data = await response.json();
 
                     if (data.success) {
-                        // Store the user session properly like auth.js did
-                        sessionStorage.setItem('user', JSON.stringify(data.data));
+                        // Normalize role to lowercase before storing, so all checks are consistent
+                        const userObj = { ...data.data, role: data.data.role.toLowerCase() };
+                        sessionStorage.setItem('user', JSON.stringify(userObj));
 
-                        // Redirect based on exact role property
-                        if (data.data.role === 'admin') {
+                        // Redirect based on normalized role
+                        if (userObj.role === 'admin') {
                             window.location.href = '/admin.html';
                         } else {
                             window.location.href = '/dashboard.html';

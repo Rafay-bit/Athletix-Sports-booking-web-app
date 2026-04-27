@@ -87,16 +87,42 @@ router.get('/booking-conflicts', async (req, res) => {
 // MODULE 2 — The Bidding Engine
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * 5. Live Auction Leaderboard
- * View: view_active_auctions
- * GET /api/features/active-auctions
- * Lists all open_bid bookings with their current highest bid.
- */
+// GET /api/features/timeslots — all time slots from DB
+router.get('/timeslots', async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request().query(`
+            SELECT slotid,
+                   CONVERT(VARCHAR(5), starttime, 108) AS starttime,
+                   CONVERT(VARCHAR(5), endtime,   108) AS endtime
+            FROM timeslots ORDER BY starttime
+        `);
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// Live Auction Leaderboard
 router.get('/active-auctions', async (req, res) => {
     try {
         const pool = await getPool();
-        const result = await pool.request().query('SELECT * FROM view_active_auctions');
+        const result = await pool.request().query(`
+            SELECT b.bookingid,
+                   f.name                                          AS facility,
+                   CONVERT(VARCHAR(10), b.bookingdate, 23)         AS bookingdate,
+                   CONVERT(VARCHAR(5),  t.starttime, 108)          AS starttime,
+                   CONVERT(VARCHAR(5),  t.endtime,   108)          AS endtime,
+                   b.userid                                        AS creator_userid,
+                   ISNULL(MAX(bi.bidamount), 0)                    AS current_highest_bid
+            FROM   bookings  b
+            JOIN   facilities f ON b.facilityid = f.facilityid
+            JOIN   timeslots  t ON b.slotid     = t.slotid
+            LEFT JOIN bids bi   ON b.bookingid  = bi.bookingid
+            WHERE  b.status = 'open_bid'
+            GROUP BY b.bookingid, f.name, b.bookingdate, t.starttime, t.endtime, b.userid
+            ORDER BY b.bookingdate, t.starttime
+        `);
         res.json({ success: true, data: result.recordset });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });
@@ -345,6 +371,181 @@ router.get('/facility-ratings', async (req, res) => {
     try {
         const pool = await getPool();
         const result = await pool.request().query('SELECT * FROM view_facility_ratings');
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NEW — Full Facilities List (with facilityid, price_per_hour for booking modal)
+// GET /api/features/facilities-full
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/facilities-full', async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request().query(`
+            SELECT f.facilityid, f.name,
+                   CAST(f.description AS VARCHAR(MAX)) AS description,
+                   f.capacity, f.is_auctionable,
+                   ISNULL(f.base_price, 0) AS base_price,
+                   CAST(ISNULL(AVG(CAST(r.rating AS FLOAT)), 0) AS DECIMAL(3,1)) AS average_rating,
+                   COUNT(r.reviewid) AS total_reviews
+            FROM facilities f
+            LEFT JOIN reviews r ON f.facilityid = r.facilityid
+            WHERE f.isactive = 1
+            GROUP BY f.facilityid, f.name, CAST(f.description AS VARCHAR(MAX)),
+                     f.capacity, f.is_auctionable, f.base_price
+            ORDER BY f.name
+        `);
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NEW — Available Slots for Next 3 Days (fixed timing, future-only)
+// GET /api/features/available-slots-3days
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/available-slots-3days', async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request().query(`
+            SELECT f.name,
+                   t.slotid,
+                   CONVERT(VARCHAR(5), t.starttime, 108) AS starttime,
+                   CONVERT(VARCHAR(5), t.endtime,   108) AS endtime,
+                   CONVERT(VARCHAR(10), DATEADD(day, n.n, CAST(GETDATE() AS DATE)), 23) AS available_date
+            FROM   (VALUES (1),(2),(3)) n(n)
+            CROSS JOIN facilities f
+            CROSS JOIN timeslots t
+            WHERE  f.isactive = 1
+              AND  NOT EXISTS (
+                       SELECT 1 FROM bookings b
+                       WHERE b.facilityid  = f.facilityid
+                         AND b.slotid      = t.slotid
+                         AND b.bookingdate = DATEADD(day, n.n, CAST(GETDATE() AS DATE))
+                         AND b.status NOT IN ('cancelled')
+                   )
+            ORDER BY available_date, f.name, t.starttime
+        `);
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NEW — Available Timeslots for a Given Facility + Date (for booking modal)
+// GET /api/features/facility-slots/:facilityid?date=YYYY-MM-DD
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/facility-slots/:facilityid', async (req, res) => {
+    const { date } = req.query;
+    if (!date)
+        return res.status(400).json({ success: false, error: '"date" query param (YYYY-MM-DD) is required' });
+    try {
+        const pool = await getPool();
+        const result = await pool.request()
+            .input('facilityid', sql.Int, req.params.facilityid)
+            .input('date',       sql.Date, date)
+            .query(`
+                SELECT t.slotid,
+                       CONVERT(VARCHAR(5), t.starttime, 108) AS starttime,
+                       CONVERT(VARCHAR(5), t.endtime,   108) AS endtime
+                FROM   timeslots t
+                WHERE  NOT EXISTS (
+                           SELECT 1 FROM bookings b
+                           WHERE b.facilityid  = @facilityid
+                             AND b.slotid      = t.slotid
+                             AND b.bookingdate = @date
+                             AND b.status NOT IN ('cancelled')
+                       )
+                ORDER BY t.starttime
+            `);
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NEW — Place a Bid (validates > current highest, then inserts)
+// POST /api/features/place-bid
+// Body: { bookingid, userid, bidamount }
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/place-bid', async (req, res) => {
+    const { bookingid, userid, bidamount } = req.body;
+    if (!bookingid || !userid || !bidamount)
+        return res.status(400).json({ success: false, error: 'bookingid, userid, and bidamount are required' });
+
+    try {
+        const pool = await getPool();
+
+        // Get & validate against current highest bid
+        const cur = await pool.request()
+            .input('bookingid', sql.Int, bookingid)
+            .query(`SELECT ISNULL(MAX(bidamount), 0) AS maxbid FROM bids WHERE bookingid = @bookingid`);
+
+        const maxbid = parseFloat(cur.recordset[0].maxbid);
+        if (parseFloat(bidamount) <= maxbid)
+            return res.status(400).json({
+                success: false,
+                error:   `Bid must exceed current highest of Rs ${maxbid.toLocaleString()}`
+            });
+
+        // Insert the new winning bid
+        await pool.request()
+            .input('bookingid', sql.Int,             bookingid)
+            .input('userid',    sql.Int,             userid)
+            .input('bidamount', sql.Decimal(10, 2),  bidamount)
+            .query(`INSERT INTO bids (bookingid, userid, bidamount, bidtime)
+                    VALUES (@bookingid, @userid, @bidamount, GETDATE())`);
+
+        res.json({ success: true, message: 'Bid placed!', new_bid: bidamount });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// NEW — Equipment linked to facilities that a user has booked
+// GET /api/features/user-equipment/:userid
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/user-equipment/:userid', async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request()
+            .input('userid', sql.Int, req.params.userid)
+            .query(`
+                SELECT eq.itemid AS equipmentid,
+                       eq.itemname,
+                       eq.hourlyrate,
+                       eq.totalstock,
+                       -- Calculate available stock system-wide
+                       eq.totalstock - ISNULL((
+                           SELECT SUM(er2.qty)
+                           FROM   equipment_rentals er2
+                           JOIN   bookings b2 ON er2.bookingid = b2.bookingid
+                           WHERE  er2.itemid = eq.itemid
+                             AND  b2.status NOT IN ('cancelled', 'completed')
+                       ), 0) AS available_stock,
+                       -- Show the user's booked facilities as context
+                       (SELECT STRING_AGG(DISTINCT f.name, ', ')
+                        FROM   bookings b
+                        JOIN   facilities f ON b.facilityid = f.facilityid
+                        WHERE  b.userid = @userid AND b.status IN ('confirmed', 'pending')
+                       ) AS facility_name
+                FROM   equipment eq
+                WHERE  EXISTS (
+                    -- Only return equipment if the user actually has an active booking
+                    SELECT 1 
+                    FROM   bookings b 
+                    WHERE  b.userid = @userid 
+                      AND  b.status IN ('confirmed', 'pending')
+                )
+                ORDER BY eq.itemname
+            `);
         res.json({ success: true, data: result.recordset });
     } catch (err) {
         res.status(500).json({ success: false, error: err.message });

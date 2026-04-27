@@ -1134,5 +1134,481 @@ tbody td {
 }
 
 ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BOOKING MODAL
+   ═══════════════════════════════════════════════════════════════ */
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.78);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+.modal-overlay.hidden { display: none; }
+
+.modal-card {
+    background: var(--bg-surface);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    animation: modalIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modalIn {
+    from { opacity: 0; transform: translateY(30px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-header h3 {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin: 0;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: all var(--transition);
+    line-height: 1;
+}
+
+.modal-close:hover {
+    color: var(--accent-red);
+    background: var(--accent-red-dim);
+}
+
+.modal-body {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.modal-form-group { display: flex; flex-direction: column; gap: 10px; }
+
+.modal-label {
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.modal-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+}
+
+.modal-error {
+    background: var(--accent-red-dim);
+    border: 1px solid rgba(255,59,48,0.3);
+    color: var(--accent-red);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+}
+
+.modal-error.hidden { display: none; }
+
+/* Date & Slot Pills */
+.date-pills, .slots-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.date-pill {
+    padding: 10px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 0.82rem;
+    font-weight: 600;
+    transition: all var(--transition);
+    user-select: none;
+}
+
+.date-pill:hover  { border-color: var(--accent-green); color: var(--accent-green); }
+.date-pill.active { background: var(--accent-green-dim); border-color: var(--accent-green); color: var(--accent-green); }
+
+.slot-pill {
+    padding: 8px 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: all var(--transition);
+    user-select: none;
+}
+
+.slot-pill:hover  { border-color: var(--accent-green); color: var(--accent-green); }
+.slot-pill.active { background: var(--accent-green-dim); border-color: var(--accent-green); color: var(--accent-green); }
+
+/* ═══════════════════════════════════════════════════════════════
+   FACILITY FILTER BAR
+   ═══════════════════════════════════════════════════════════════ */
+.filter-bar {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    padding: 14px 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+}
+
+.filter-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 10px 14px;
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color var(--transition);
+}
+
+.filter-input:focus { border-color: var(--accent-green); }
+.filter-input::placeholder { color: var(--text-muted); }
+
+.filter-types { display: flex; gap: 8px; flex-wrap: wrap; }
+
+.filter-type-btn {
+    padding: 7px 13px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    color: var(--text-muted);
+    font-family: var(--font-display);
+    font-size: 0.7rem;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all var(--transition);
+}
+
+.filter-type-btn:hover  { border-color: var(--accent-green); color: var(--accent-green); }
+.filter-type-btn.active { background: var(--accent-green-dim); border-color: var(--accent-green); color: var(--accent-green); }
+
+/* ── NEW RICH FILTER BAR ──────────────────────────────────────── */
+.filter-bar-wrap {
+    margin-bottom: 24px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.filter-row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    flex-wrap: wrap;
+}
+
+.filter-search-wrap {
+    flex: 1;
+    min-width: 220px;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.filter-search-icon {
+    position: absolute;
+    left: 12px;
+    font-size: 0.9rem;
+    pointer-events: none;
+    opacity: 0.5;
+}
+
+.filter-search-wrap .filter-input {
+    padding-left: 36px;
+    width: 100%;
+    min-width: 0;
+}
+
+.filter-select {
+    padding: 10px 14px;
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.85rem;
+    outline: none;
+    cursor: pointer;
+    transition: border-color var(--transition);
+    min-width: 140px;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%236b7280' d='M0 0l6 8 6-8z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 32px;
+}
+
+.filter-select:focus  { border-color: var(--accent-green); }
+.filter-select:disabled { opacity: 0.5; cursor: wait; }
+.filter-select option { background: #1a1a1a; color: var(--text-primary); }
+
+.filter-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.chip {
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--transition);
+    white-space: nowrap;
+    user-select: none;
+}
+
+.chip:hover  { border-color: var(--accent-green); color: var(--accent-green); }
+.chip.active { background: var(--accent-green-dim); border-color: var(--accent-green); color: var(--accent-green); }
+
+/* Category label on facility card */
+.facility-cat-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent-green);
+    font-weight: 700;
+    margin-bottom: 4px;
+    opacity: 0.8;
+}
+
+/* Auctionable badge on facility card */
+.facility-bid-badge {
+    display: inline-block;
+    margin-top: 8px;
+    padding: 3px 10px;
+    background: var(--accent-gold-dim);
+    border: 1px solid var(--accent-gold);
+    color: var(--accent-gold);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    border-radius: 3px;
+}
+
+/* Booking hint on facility cards */
+.book-hint {
+    margin-top: 12px;
+    padding: 8px;
+    text-align: center;
+    font-family: var(--font-display);
+    font-size: 0.8rem;
+    letter-spacing: 2px;
+    color: var(--accent-green);
+    border-top: 1px solid var(--accent-green-dim);
+    opacity: 0;
+    transition: opacity var(--transition);
+}
+
+.facility-card:hover .book-hint { opacity: 1; }
+.facility-card { cursor: pointer; }
+
+/* ═══════════════════════════════════════════════════════════════
+   AUCTION COUNTDOWN & MODAL AUCTION NOTE
+   ═══════════════════════════════════════════════════════════════ */
+.auction-countdown-wrap {
+    text-align: center;
+    margin-bottom: 18px;
+    padding: 12px 16px;
+    background: rgba(212, 175, 55, 0.06);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 8px;
+}
+
+.auction-countdown-label {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.auction-countdown {
+    font-family: var(--font-display);
+    font-size: 2rem;
+    letter-spacing: 2px;
+    color: var(--accent-gold);
+}
+
+.auction-countdown.closed { color: var(--accent-red); }
+
+.bid-closed-msg {
+    margin-top: 8px;
+    font-size: 0.78rem;
+    color: var(--accent-red);
+    opacity: 0.85;
+}
+
+/* Auction bid input inside booking modal */
+.modal-auction-group {
+    flex-direction: column;
+    gap: 10px;
+    background: rgba(212, 175, 55, 0.06);
+    border: 1px solid rgba(212, 175, 55, 0.25);
+    border-radius: 8px;
+    padding: 14px;
+}
+
+.modal-auction-note {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.5;
+}
+
+.modal-auction-note strong { color: var(--accent-gold); }
+
+/* ═══════════════════════════════════════════════════════════════
+   AUCTION BID FORM
+   ═══════════════════════════════════════════════════════════════ */
+.bid-form {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.bid-input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    background: var(--bg-base);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    font-size: 0.88rem;
+    outline: none;
+    transition: border-color var(--transition);
+}
+
+.bid-input:focus    { border-color: var(--accent-gold); }
+.bid-input::placeholder { color: var(--text-muted); font-size: 0.78rem; }
+
+.bid-submit-btn {
+    padding: 10px 16px;
+    background: var(--accent-gold);
+    color: #000;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    letter-spacing: 1.5px;
+    white-space: nowrap;
+    border: none;
+}
+
+.bid-submit-btn:hover {
+    background: #e6c347;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(212,175,55,0.3);
+}
+
+.bid-msg {
+    font-size: 0.8rem;
+    min-height: 20px;
+    text-align: center;
+    transition: color 0.2s;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   TOAST NOTIFICATION
+   ═══════════════════════════════════════════════════════════════ */
+.toast {
+    position: fixed;
+    bottom: 32px;
+    right: 32px;
+    z-index: 9999;
+    padding: 14px 20px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    max-width: 380px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    transform: translateY(20px);
+    opacity: 0;
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+}
+
+.toast.visible { opacity: 1; transform: translateY(0); }
+
+.toast-success {
+    background: rgba(57,255,20,0.15);
+    border: 1px solid var(--accent-green);
+    color: var(--accent-green);
+}
+
+.toast-error {
+    background: var(--accent-red-dim);
+    border: 1px solid var(--accent-red);
+    color: var(--accent-red);
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   AVAILABLE SLOTS — DATE GROUP HEADER
+   ═══════════════════════════════════════════════════════════════ */
+.date-group-header {
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    letter-spacing: 2px;
+    color: var(--accent-green);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--accent-green-dim);
+}
+
     background: rgba(255, 255, 255, 0.2);
 }

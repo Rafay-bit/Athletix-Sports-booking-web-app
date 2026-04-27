@@ -26,7 +26,6 @@
             <div class="sidebar-nav">
                 <div class="nav-item active" data-section="facilities"><span class="icon">🏟️</span> Facilities</div>
                 <div class="nav-item" data-section="bookings"><span class="icon">📋</span> My Bookings</div>
-                <div class="nav-item" data-section="availability"><span class="icon">🔍</span> Search Slots</div>
                 <div class="nav-item" data-section="auctions"><span class="icon">⚡</span> Auctions</div>
                 <div class="nav-item" data-section="equipment"><span class="icon">🎾</span> Equipment</div>
                 <div class="nav-item" data-section="notifications"><span class="icon">🔔</span> Notifications</div>
@@ -68,32 +67,15 @@
                                 <th>Time</th>
                                 <th>Price</th>
                                 <th>Status</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="bookingsTableBody">
                             <tr>
-                                <td colspan="6" class="text-center text-muted" style="padding:40px">Loading...</td>
+                                <td colspan="7" class="text-center text-muted" style="padding:40px">Loading...</td>
                             </tr>
                         </tbody>
                     </table>
-                </div>
-            </div>
-
-            <!-- ═══ SEARCH AVAILABILITY ═══ -->
-            <div class="section" id="sec-availability">
-                <div class="section-header">
-                    <h2>Search Available Slots</h2>
-                    <p>Find open facility + timeslot combinations for a specific date</p>
-                </div>
-                <div class="search-bar">
-                    <input type="date" id="searchDate" class="form-input">
-                    <button class="btn btn-gold btn-sm" id="searchBtn">SEARCH</button>
-                </div>
-                <div id="availabilityResults">
-                    <div class="empty-state">
-                        <div class="icon">🔍</div>
-                        <p>Select a date to search for available slots</p>
-                    </div>
                 </div>
             </div>
 
