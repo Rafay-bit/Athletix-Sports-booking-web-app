@@ -280,15 +280,33 @@ async function loadBookings() {
             return;
         }
 
-        // Filter bookings for current user, exclude open_bid since they're in Auctions
-        const myBookings = data.data.filter(b => b.username === currentUser.username && b.status !== 'open_bid');
+        // Filter bookings for current user, exclude open_bid (Auctions) and cancelled
+        const myBookings = data.data.filter(b => 
+            b.username === currentUser.username && 
+            b.status !== 'open_bid' && 
+            b.status !== 'cancelled'
+        );
 
         if (!myBookings.length) {
-            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding:40px">You have no non-auction bookings yet</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding:40px">You have no bookings yet</td></tr>';
             return;
         }
 
-        tbody.innerHTML = myBookings.map(b => `
+        // Fetch equipment rentals for each booking in parallel
+        const equipPromises = myBookings.map(b =>
+            fetch(`${API}/api/features/booking-equipment/${b.bookingid}`)
+                .then(r => r.json()).catch(() => ({ success: false, data: [] }))
+        );
+        const equipResults = await Promise.all(equipPromises);
+
+        let html = '';
+        myBookings.forEach((b, idx) => {
+            const equipData = equipResults[idx];
+            const equipList = (equipData.success && equipData.data.length)
+                ? equipData.data.map(e => `${e.itemname} x${e.qty}`).join(', ')
+                : '';
+
+            html += `
             <tr>
                 <td style="font-family:var(--font-display);font-size:1.1rem">#${b.bookingid}</td>
                 <td>${b.facility || '—'}</td>
@@ -297,13 +315,26 @@ async function loadBookings() {
                 <td style="color:var(--accent-gold)">Rs ${parseFloat(b.finalprice || 0).toLocaleString()}</td>
                 <td><span class="badge badge-${b.status}">${b.status.toUpperCase()}</span></td>
                 <td>
-                    ${b.status !== 'cancelled' && b.status !== 'completed' 
-                        ? `<button class="btn btn-outline btn-sm" onclick="cancelBooking(${b.bookingid})" style="border-color:var(--accent-red);color:var(--accent-red);">CANCEL</button>`
-                        : '—'
+                    ${b.status !== 'cancelled' && b.status !== 'completed'
+                        ? `<button onclick="cancelBooking(${b.bookingid})" style="display:inline-flex;align-items:center;gap:5px;padding:5px 14px;font-size:0.7rem;font-family:var(--font-display);font-weight:600;letter-spacing:0.06em;border:1.5px solid var(--accent-red);color:var(--accent-red);background:rgba(255,59,48,0.08);border-radius:6px;cursor:pointer;">&#10005; CANCEL</button>`
+                        : '<span style="color:var(--text-muted)">&#8212;</span>'
                     }
                 </td>
-            </tr>
-        `).join('');
+            </tr>`;
+
+            // Equipment sub-row
+            if (equipList) {
+                html += `
+                <tr class="equip-sub-row">
+                    <td></td>
+                    <td colspan="6" style="padding:4px 12px 10px;font-size:0.75rem;color:var(--accent-gold)">
+                        🎾 <strong>Equipment:</strong> ${equipList}
+                    </td>
+                </tr>`;
+            }
+        });
+
+        tbody.innerHTML = html;
     } catch (err) {
         tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted" style="padding:40px">Failed to load bookings</td></tr>';
     }
@@ -586,31 +617,7 @@ function renderFacilities() {
     }).join('');
 }
 
-async function loadBookings() {
-    const tbody = document.getElementById('bookingsTableBody');
-    try {
-        const res  = await fetch(`${API}/api/bookings`);
-        const data = await res.json();
-        const mine = (data.data || []).filter(b => b.username === currentUser.username);
 
-        if (!mine.length) {
-            tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding:40px">You have no bookings yet</td></tr>';
-            return;
-        }
-
-        tbody.innerHTML = mine.map(b => `
-            <tr>
-                <td style="font-family:var(--font-display);font-size:1.1rem">#${b.bookingid}</td>
-                <td>${b.facility}</td>
-                <td>${formatDate(b.bookingdate)}</td>
-                <td>${formatTime(b.starttime)} — ${formatTime(b.endtime)}</td>
-                <td style="color:var(--accent-gold)">Rs ${parseFloat(b.finalprice).toLocaleString()}</td>
-                <td><span class="badge badge-${b.status}">${b.status}</span></td>
-            </tr>`).join('');
-    } catch {
-        tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted" style="padding:40px">Failed to load bookings</td></tr>';
-    }
-}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // AVAILABLE SLOTS — next 3 days, grouped by date, fixed timings
@@ -842,10 +849,24 @@ async function placeBid(bookingid, currentHighest) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// EQUIPMENT — only from facilities the user has actually booked
+// EQUIPMENT — available equipment with rent option
 // ═══════════════════════════════════════════════════════════════════════════════
+let userActiveBookings = []; // cached for equipment rental selector
+
 async function loadEquipment() {
     const grid = document.getElementById('equipmentGrid');
+
+    // First, load user's active bookings so the Rent dropdown can reference them
+    try {
+        const bkRes  = await fetch(`${API}/api/bookings`);
+        const bkData = await bkRes.json();
+        if (bkData.success) {
+            userActiveBookings = bkData.data.filter(b =>
+                b.username === currentUser.username && (b.status === 'confirmed' || b.status === 'pending')
+            );
+        }
+    } catch { /* ignore */ }
+
     try {
         const res  = await fetch(`${API}/api/features/user-equipment/${currentUser.userid}`);
         const data = await res.json();
@@ -854,15 +875,21 @@ async function loadEquipment() {
             grid.innerHTML = `
                 <div class="empty-state">
                     <div class="icon">🎾</div>
-                    <p>No equipment linked to your bookings.<br>
-                    Book a facility first — equipment from that venue will appear here.</p>
+                    <p>No equipment available.<br>
+                    Book a facility first — equipment will appear here.</p>
                 </div>`;
             return;
         }
 
+        // Build booking options for the dropdown
+        const bookingOpts = userActiveBookings.map(b =>
+            `<option value="${b.bookingid}">#${b.bookingid} — ${b.facility} (${formatDate(b.bookingdate)})</option>`
+        ).join('');
+
         grid.innerHTML = data.data.map((eq, i) => {
             const avail = parseInt(eq.available_stock ?? eq.totalstock ?? 0);
             const color = avail > 5 ? 'var(--accent-green)' : avail > 0 ? 'var(--accent-gold)' : 'var(--accent-red)';
+            const canRent = avail > 0 && userActiveBookings.length > 0;
             return `
             <div class="facility-card stagger-${(i % 12) + 1}">
                 <div class="facility-card-header" style="height:44px;background:linear-gradient(135deg,rgba(212,175,55,0.15),rgba(26,83,92,0.1))">
@@ -885,11 +912,60 @@ async function loadEquipment() {
                             <span class="stat-val" style="color:${color}">${avail}</span>
                         </div>
                     </div>
+                    ${canRent ? `
+                    <div class="equip-rent-section" style="margin-top:12px;border-top:1px solid rgba(255,255,255,0.06);padding-top:10px">
+                        <select id="rent-booking-${eq.equipmentid}" class="filter-select" style="font-size:0.7rem;margin-bottom:6px">
+                            ${bookingOpts}
+                        </select>
+                        <div style="display:flex;gap:6px;align-items:center">
+                            <input type="number" id="rent-qty-${eq.equipmentid}" min="1" max="${avail}" value="1"
+                                   class="filter-input" style="width:60px;font-size:0.75rem;padding:5px 8px">
+                            <button class="btn-rent" onclick="rentEquipment(${eq.equipmentid}, ${avail})">RENT</button>
+                        </div>
+                        <div class="rent-msg" id="rent-msg-${eq.equipmentid}" style="font-size:0.7rem;margin-top:4px"></div>
+                    </div>` : avail === 0 ? `<div style="margin-top:10px;color:var(--accent-red);font-size:0.75rem;font-weight:600">OUT OF STOCK</div>` : ''}
                 </div>
             </div>`;
         }).join('');
     } catch {
         grid.innerHTML = '<div class="empty-state"><p>Failed to load equipment data</p></div>';
+    }
+}
+
+async function rentEquipment(itemid, maxAvail) {
+    const bookingSelect = document.getElementById(`rent-booking-${itemid}`);
+    const qtyInput      = document.getElementById(`rent-qty-${itemid}`);
+    const msgEl         = document.getElementById(`rent-msg-${itemid}`);
+    const bookingid     = parseInt(bookingSelect.value);
+    const qty           = parseInt(qtyInput.value);
+
+    msgEl.style.color = '';
+    msgEl.textContent = '';
+
+    if (!bookingid) { msgEl.style.color = 'var(--accent-red)'; msgEl.textContent = 'Select a booking'; return; }
+    if (!qty || qty < 1 || qty > maxAvail) { msgEl.style.color = 'var(--accent-red)'; msgEl.textContent = `Qty must be 1–${maxAvail}`; return; }
+
+    msgEl.style.color = 'var(--text-muted)';
+    msgEl.textContent = 'Renting…';
+
+    try {
+        const res  = await fetch(`${API}/api/features/rent-equipment`, {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ bookingid, itemid, qty })
+        });
+        const data = await res.json();
+        if (data.success) {
+            msgEl.style.color = 'var(--accent-green)';
+            msgEl.textContent = `✅ ${qty} unit(s) rented!`;
+            setTimeout(() => { loadEquipment(); loadBookings(); }, 1200);
+        } else {
+            msgEl.style.color = 'var(--accent-red)';
+            msgEl.textContent = '⚠️ ' + (data.error || 'Rental failed');
+        }
+    } catch {
+        msgEl.style.color = 'var(--accent-red)';
+        msgEl.textContent = '⚠️ Connection failed';
     }
 }
 
@@ -942,11 +1018,25 @@ function formatDate(d) {
 
 function formatTime(t) {
     if (!t) return '—';
-    // Handles "HH:MM" or "HH:MM:SS" strings from the DB
-    const parts = String(t).split(':');
-    const h     = parseInt(parts[0], 10);
-    const m     = parts[1] || '00';
-    const ampm  = h >= 12 ? 'PM' : 'AM';
-    const h12   = h % 12 || 12;
-    return `${h12}:${m} ${ampm}`;
+    try {
+        // If it's a full ISO string from the DB
+        if (String(t).includes('T')) {
+            const date = new Date(t);
+            let h = date.getUTCHours();
+            const m = String(date.getUTCMinutes()).padStart(2, '0');
+            const ampm = h >= 12 ? 'PM' : 'AM';
+            h = h % 12 || 12;
+            return `${h}:${m} ${ampm}`;
+        }
+        
+        // Fallback for "HH:MM" string format
+        const parts = String(t).split(':');
+        let h = parseInt(parts[0], 10);
+        const m = parts[1] || '00';
+        const ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+        return `${h}:${m} ${ampm}`;
+    } catch {
+        return String(t);
+    }
 }

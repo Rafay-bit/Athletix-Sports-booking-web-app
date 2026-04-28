@@ -531,10 +531,12 @@ router.get('/user-equipment/:userid', async (req, res) => {
                              AND  b2.status NOT IN ('cancelled', 'completed')
                        ), 0) AS available_stock,
                        -- Show the user's booked facilities as context
-                       (SELECT STRING_AGG(DISTINCT f.name, ', ')
-                        FROM   bookings b
-                        JOIN   facilities f ON b.facilityid = f.facilityid
-                        WHERE  b.userid = @userid AND b.status IN ('confirmed', 'pending')
+                       (SELECT STRING_AGG(fname, ', ')
+                        FROM (SELECT DISTINCT f.name AS fname
+                              FROM   bookings b
+                              JOIN   facilities f ON b.facilityid = f.facilityid
+                              WHERE  b.userid = @userid AND b.status IN ('confirmed', 'pending')
+                             ) distinct_facs
                        ) AS facility_name
                 FROM   equipment eq
                 WHERE  EXISTS (
@@ -545,6 +547,72 @@ router.get('/user-equipment/:userid', async (req, res) => {
                       AND  b.status IN ('confirmed', 'pending')
                 )
                 ORDER BY eq.itemname
+            `);
+        res.json({ success: true, data: result.recordset });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// POST /api/features/rent-equipment — Rent equipment against a booking
+// Body: { bookingid, itemid, qty }
+// ─────────────────────────────────────────────────────────────────────────────
+router.post('/rent-equipment', async (req, res) => {
+    const { bookingid, itemid, qty } = req.body;
+    if (!bookingid || !itemid || !qty || qty < 1)
+        return res.status(400).json({ success: false, error: 'bookingid, itemid, and qty (>=1) are required' });
+    try {
+        const pool = await getPool();
+
+        // Check available stock
+        const stockCheck = await pool.request()
+            .input('itemid', sql.Int, itemid)
+            .query(`
+                SELECT eq.totalstock - ISNULL((
+                    SELECT SUM(er2.qty)
+                    FROM   equipment_rentals er2
+                    JOIN   bookings b2 ON er2.bookingid = b2.bookingid
+                    WHERE  er2.itemid = eq.itemid
+                      AND  b2.status NOT IN ('cancelled', 'completed')
+                ), 0) AS available
+                FROM equipment eq
+                WHERE eq.itemid = @itemid
+            `);
+
+        if (!stockCheck.recordset.length)
+            return res.status(404).json({ success: false, error: 'Equipment not found' });
+
+        const available = stockCheck.recordset[0].available;
+        if (qty > available)
+            return res.status(400).json({ success: false, error: `Only ${available} units available` });
+
+        // Insert the rental
+        await pool.request()
+            .input('bookingid', sql.Int, bookingid)
+            .input('itemid', sql.Int, itemid)
+            .input('qty', sql.Int, qty)
+            .query('INSERT INTO equipment_rentals (bookingid, itemid, qty) VALUES (@bookingid, @itemid, @qty)');
+
+        res.json({ success: true, message: `Rented ${qty} unit(s) successfully` });
+    } catch (err) {
+        res.status(500).json({ success: false, error: err.message });
+    }
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+// GET /api/features/booking-equipment/:bookingid — Equipment rented for a booking
+// ─────────────────────────────────────────────────────────────────────────────
+router.get('/booking-equipment/:bookingid', async (req, res) => {
+    try {
+        const pool = await getPool();
+        const result = await pool.request()
+            .input('bookingid', sql.Int, req.params.bookingid)
+            .query(`
+                SELECT er.rentalid, eq.itemname, er.qty, eq.hourlyrate
+                FROM equipment_rentals er
+                JOIN equipment eq ON er.itemid = eq.itemid
+                WHERE er.bookingid = @bookingid
             `);
         res.json({ success: true, data: result.recordset });
     } catch (err) {

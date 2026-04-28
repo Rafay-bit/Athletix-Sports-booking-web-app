@@ -673,6 +673,28 @@ a:hover {
     color: #a855f7;
 }
 
+/* ── CANCEL BUTTON in bookings table ───────────────────────── */
+.btn-cancel {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 14px;
+    font-size: 0.7rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    border: 1.5px solid var(--accent-red);
+    color: var(--accent-red);
+    background: rgba(255, 59, 48, 0.08);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.15s;
+}
+.btn-cancel:hover {
+    background: rgba(255, 59, 48, 0.22);
+    transform: scale(1.04);
+}
+
 .badge-student {
     background: var(--accent-green-dim);
     color: var(--accent-green);
