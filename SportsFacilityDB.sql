@@ -368,6 +368,21 @@ go
 
 -- 18. feedback & sentiment analysis
 create view view_facility_ratings as
+select f.name, avg(cast(r.rating as float)) as avg_rating, count(r.reviewid) as review_count
+from facilities f
+left join reviews r on f.facilityid = r.facilityid
+group by f.name;
+go
+
+-- 19. admin summary stats
+create view view_admin_stats as
+select 
+    (select count(*) from users) as total_users,
+    (select count(*) from facilities) as total_facilities,
+    (select count(*) from bookings) as total_bookings,
+    (select isnull(sum(totalstock), 0) from equipment) as total_equipment,
+    (select isnull(sum(finalprice), 0) from bookings where status = 'confirmed') as total_revenue;
+go
 select f.name, avg(cast(r.rating as decimal(10,2))) as average_rating, count(r.reviewid) as total_reviews
 from facilities f
 left join reviews r on f.facilityid = r.facilityid

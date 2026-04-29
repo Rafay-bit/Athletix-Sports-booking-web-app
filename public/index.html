@@ -1,0 +1,1334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Athletix — Premium Sports Booking</title>
+  <link rel="stylesheet" href="/css/style.css">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Russo+One&family=Exo+2:ital,wght@0,300;0,400;0,600;0,700;0,800;1,400&display=swap');
+
+:root {
+  --blue:        #0057FF;
+  --blue-mid:    #0044CC;
+  --blue-dark:   #002D8A;
+  --green:       #00E5A0;
+  --green-dark:  #00A872;
+  --black:       #060910;
+  --black2:      #0C1018;
+  --black3:      #111822;
+  --border:      rgba(0,229,160,0.1);
+  --border2:     rgba(0,87,255,0.15);
+  --white:       #F0F4FF;
+  --gray:        rgba(240,244,255,0.4);
+  --gray2:       rgba(240,244,255,0.15);
+  --glow-blue:   rgba(0,87,255,0.3);
+  --glow-green:  rgba(0,229,160,0.2);
+  --sidebar-w:   260px;
+  --transition:  0.22s ease;
+}
+
+*, *::before, *::after { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; font-size:16px; }
+body {
+  background: var(--black);
+  font-family: 'Exo 2', sans-serif;
+  color: var(--white);
+  overflow-x: hidden;
+  cursor: none;
+  min-height: 100vh;
+}
+
+/* ── CURSOR ── */
+#cur  { position:fixed; width:10px;height:10px; background:var(--green); border-radius:50%; pointer-events:none; z-index:9999; transform:translate(-50%,-50%); transition:width .2s,height .2s,background .2s; }
+#curR { position:fixed; width:36px;height:36px; border:1.5px solid var(--green); border-radius:50%; pointer-events:none; z-index:9998; transform:translate(-50%,-50%); transition:width .25s,height .25s,opacity .25s; opacity:.45; }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:var(--black2); }
+::-webkit-scrollbar-thumb { background:linear-gradient(var(--blue),var(--green-dark)); border-radius:4px; }
+
+/* ════════════════════════════════════
+   LANDING PAGE
+════════════════════════════════════ */
+#landing-page {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hero */
+.hero {
+  position: relative;
+  height: 100vh;
+  min-height: 640px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+}
+.hero-bg-img {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
+  z-index: 0;
+  transform: scale(1.04);
+  transition: transform 8s ease;
+}
+.hero-bg-img.loaded { transform: scale(1); }
+/* Dark gradient overlays */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background:
+    linear-gradient(to right, rgba(6,9,16,0.92) 0%, rgba(6,9,16,0.6) 45%, rgba(6,9,16,0.2) 70%, rgba(6,9,16,0.55) 100%),
+    linear-gradient(to top, rgba(6,9,16,0.9) 0%, transparent 40%);
+}
+/* Grid lines */
+.hero-grid {
+  position:absolute; inset:0; z-index:2;
+  background-image:
+    linear-gradient(rgba(0,229,160,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,160,0.03) 1px, transparent 1px);
+  background-size: 64px 64px;
+}
+/* Glow orbs */
+.orb { position:absolute; border-radius:50%; filter:blur(100px); pointer-events:none; }
+.orb-1 { width:600px;height:600px; background:rgba(0,87,255,0.2); top:-150px; left:-100px; z-index:2; }
+.orb-2 { width:400px;height:400px; background:rgba(0,229,160,0.12); bottom:-100px; right:5%; z-index:2; }
+
+/* NAV */
+.land-nav {
+  position: absolute;
+  top:0; left:0; right:0;
+  padding: 24px 56px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 10;
+  background: linear-gradient(to bottom, rgba(6,9,16,0.85), transparent);
+}
+.logo {
+  font-family: 'Russo One', sans-serif;
+  font-size: 26px; letter-spacing: 4px;
+  background: linear-gradient(90deg, var(--blue), var(--green));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.nav-actions { display:flex; gap:12px; align-items:center; }
+.btn-nav-login {
+  font-family: 'Exo 2', sans-serif; font-weight:700;
+  font-size:12px; letter-spacing:3px; text-transform:uppercase;
+  padding: 11px 28px;
+  background: linear-gradient(135deg, var(--blue), var(--green-dark));
+  color:#fff; border:none; cursor:none;
+  clip-path: polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  transition: filter .2s, transform .2s;
+}
+.btn-nav-login:hover { filter:brightness(1.2); transform:translateY(-2px); }
+.btn-hamburger {
+  width:42px;height:42px;
+  border:1.5px solid rgba(0,229,160,0.2);
+  background:transparent; cursor:none;
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column; gap:5px;
+  transition: border-color .2s;
+}
+.btn-hamburger:hover { border-color:var(--green); }
+.btn-hamburger span { display:block;width:18px;height:1.5px;background:var(--white); transition:background .2s; }
+.btn-hamburger:hover span { background:var(--green); }
+
+/* HERO CONTENT */
+.hero-content {
+  position: relative;
+  z-index: 5;
+  padding: 0 56px;
+  max-width: 600px;
+}
+.eyebrow {
+  font-size:10px; letter-spacing:5px; text-transform:uppercase;
+  color: var(--green);
+  display:flex; align-items:center; gap:12px;
+  margin-bottom:20px;
+  animation: fadeUp .7s .1s both;
+}
+.eyebrow::before { content:''; width:28px;height:1px; background:var(--green); }
+.hero-h1 {
+  font-family: 'Russo One', sans-serif;
+  font-size: clamp(54px, 8vw, 104px);
+  line-height: .9; letter-spacing:-1px;
+  animation: fadeUp .7s .2s both;
+}
+.hero-h1 .grad {
+  background: linear-gradient(95deg, var(--blue), var(--green));
+  -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text;
+}
+.hero-sub {
+  margin-top:22px;
+  font-size:15px; font-weight:300; line-height:1.75;
+  color:rgba(240,244,255,0.5); max-width:380px;
+  animation: fadeUp .7s .35s both;
+}
+.hero-ctas {
+  margin-top:38px;
+  display:flex; gap:14px; align-items:center;
+  animation: fadeUp .7s .5s both;
+}
+.btn-primary {
+  font-family:'Exo 2',sans-serif; font-weight:700;
+  font-size:12px; letter-spacing:3px; text-transform:uppercase;
+  padding:14px 34px;
+  background:linear-gradient(135deg,var(--blue),var(--green-dark));
+  color:#fff; border:none; cursor:none;
+  clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);
+  transition:filter .2s,transform .2s;
+  position:relative;overflow:hidden;
+}
+.btn-primary::after { content:''; position:absolute;top:0;left:-100%;width:100%;height:100%; background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent); transition:left .4s; }
+.btn-primary:hover::after { left:100%; }
+.btn-primary:hover { filter:brightness(1.2); transform:translateY(-2px); }
+.btn-ghost {
+  font-size:12px; letter-spacing:2px; text-transform:uppercase;
+  color:var(--gray); cursor:none; border:none; background:transparent;
+  border-bottom:1px solid rgba(240,244,255,0.15); padding-bottom:2px;
+  transition:color .2s,border-color .2s;
+}
+.btn-ghost:hover { color:var(--green); border-color:var(--green); }
+
+/* SIDE CARD (left bottom) */
+.hero-stat-card {
+  position:absolute; left:56px; bottom:88px; z-index:6;
+  background:rgba(12,16,24,0.8);
+  backdrop-filter:blur(20px);
+  border:1px solid var(--border);
+  padding:20px 24px; width:152px;
+  animation: fadeUp .7s .65s both;
+}
+.hsc-label { font-size:8px; letter-spacing:3.5px; text-transform:uppercase; color:var(--green); margin-bottom:14px; display:block; }
+.hsc-sport { font-family:'Russo One',sans-serif; font-size:13px; line-height:1.4; }
+.hsc-vs { font-size:9px; color:var(--gray); letter-spacing:2px; margin:3px 0; }
+.hsc-div { height:1px; background:var(--border); margin:14px 0; }
+.hsc-stat-row { display:flex; align-items:center; gap:10px; }
+.hsc-num { font-family:'Russo One',sans-serif; font-size:30px; background:linear-gradient(135deg,var(--blue),var(--green)); -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; line-height:1; }
+.hsc-lbl { font-size:8.5px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gray); line-height:1.5; }
+
+/* RIGHT WATERMARK */
+.hero-right-mark {
+  position:absolute; right:52px; top:50%; transform:translateY(-50%);
+  z-index:3; text-align:right;
+  animation: fadeRight .7s .3s both;
+}
+.mark-big {
+  font-family:'Russo One',sans-serif;
+  font-size:clamp(90px,16vw,200px); line-height:1;
+  background:linear-gradient(160deg,rgba(0,87,255,0.1),rgba(0,229,160,0.05));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  letter-spacing:-5px; user-select:none;
+}
+.mark-sub { font-size:9px; letter-spacing:5px; text-transform:uppercase; color:rgba(240,244,255,0.15); margin-top:-14px; }
+
+/* Scroll indicator */
+.scroll-ind {
+  position:absolute; bottom:28px; left:50%; transform:translateX(-50%);
+  z-index:6; display:flex; flex-direction:column; align-items:center; gap:8px;
+  font-size:8px; letter-spacing:3.5px; text-transform:uppercase; color:var(--gray);
+  animation: fadeUp 1s 1s both;
+}
+.scroll-line { width:1px;height:44px; background:linear-gradient(to bottom,transparent,var(--green)); animation:scrollAnim 2s ease-in-out infinite; }
+
+/* LOGIN SECTION */
+.login-section {
+  min-height:100vh;
+  background:var(--black2);
+  display:flex; align-items:stretch;
+  position:relative; overflow:hidden;
+}
+.login-section::before {
+  content:''; position:absolute; inset:0;
+  background:
+    radial-gradient(ellipse 60% 50% at 0% 50%,rgba(0,87,255,0.1),transparent),
+    radial-gradient(ellipse 40% 40% at 100% 80%,rgba(0,229,160,0.07),transparent);
+  z-index:0;
+}
+.login-section::after {
+  content:''; position:absolute; top:0;left:0;right:0; height:2px;
+  background:linear-gradient(90deg,transparent,var(--blue),var(--green),transparent); z-index:1;
+}
+.login-left {
+  flex:1; padding:80px 64px;
+  position:relative; z-index:2;
+  display:flex; flex-direction:column; justify-content:center;
+}
+.login-eyebrow { font-size:10px;letter-spacing:5px;text-transform:uppercase;color:var(--green);margin-bottom:18px;display:flex;align-items:center;gap:10px; }
+.login-eyebrow::before { content:'';width:28px;height:1px;background:var(--green); }
+.login-left h2 { font-family:'Russo One',sans-serif;font-size:clamp(40px,6vw,78px);line-height:.9;letter-spacing:-1px;margin-bottom:22px; }
+.login-left h2 .grad { background:linear-gradient(95deg,var(--blue),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text; }
+.login-left p { font-size:15px;font-weight:300;color:rgba(240,244,255,0.4);line-height:1.8;max-width:380px;margin-bottom:44px; }
+.feature-list { display:flex;flex-direction:column;gap:14px; }
+.feature-item { display:flex;align-items:center;gap:14px;font-size:13px;color:rgba(240,244,255,0.6); }
+.fdot { width:7px;height:7px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--blue),var(--green));box-shadow:0 0 10px var(--glow-green); }
+.login-right {
+  width:440px;
+  background:rgba(6,9,16,0.7);
+  backdrop-filter:blur(20px);
+  border-left:1px solid rgba(0,229,160,0.08);
+  display:flex;align-items:center;justify-content:center;
+  padding:60px 48px; position:relative;z-index:2;
+}
+.login-right::before { content:'';position:absolute;top:0;left:-1px;bottom:0;width:3px;background:linear-gradient(to bottom,transparent,var(--blue),var(--green),transparent); }
+.login-card { width:100%; }
+.login-card h3 { font-family:'Russo One',sans-serif;font-size:28px;letter-spacing:2px;margin-bottom:6px; }
+.lc-sub { font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(240,244,255,0.25);margin-bottom:36px;display:block; }
+.form-g { margin-bottom:20px; }
+.form-g label { display:block;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:rgba(240,244,255,0.3);margin-bottom:8px; }
+.form-g input {
+  width:100%; background:rgba(255,255,255,0.04);
+  border:1px solid rgba(0,229,160,0.1); color:var(--white);
+  font-family:'Exo 2',sans-serif;font-size:14px;
+  padding:13px 16px;outline:none;
+  transition:border-color .2s,background .2s,box-shadow .2s; cursor:none;
+}
+.form-g input:focus { border-color:var(--blue);background:rgba(0,87,255,0.06);box-shadow:0 0 0 3px rgba(0,87,255,0.1); }
+.form-g input::placeholder { color:rgba(240,244,255,0.18); }
+.btn-submit {
+  width:100%;padding:15px;
+  background:linear-gradient(135deg,var(--blue),var(--green-dark));
+  color:#fff;border:none;cursor:none;
+  font-family:'Russo One',sans-serif;font-size:16px;letter-spacing:3px;
+  clip-path:polygon(10px 0%,100% 0%,calc(100% - 10px) 100%,0% 100%);
+  transition:filter .2s,transform .15s;margin-top:8px;
+  position:relative;overflow:hidden;
+}
+.btn-submit::after { content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);transition:left .4s; }
+.btn-submit:hover::after{left:100%;}
+.btn-submit:hover{filter:brightness(1.2);transform:translateY(-1px);}
+.form-links { margin-top:22px;text-align:center;font-size:11px;letter-spacing:1px;color:rgba(240,244,255,0.18);line-height:2.2; }
+.form-links a { color:var(--green);text-decoration:none;cursor:none; }
+.form-links a:hover{text-decoration:underline;}
+
+/* ════════════════════════════════════
+   DASHBOARD
+════════════════════════════════════ */
+#dashboard-page { display:none; min-height:100vh; }
+
+.dash-layout {
+  display:flex; min-height:100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width:var(--sidebar-w);
+  background:var(--black2);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;
+  z-index:200;
+  transition:transform .3s ease;
+}
+.sidebar::after {
+  content:'';position:absolute;top:0;right:-1px;bottom:0;width:2px;
+  background:linear-gradient(to bottom,transparent,var(--blue),var(--green),transparent);
+  opacity:.4;
+}
+.sb-logo {
+  padding:28px 24px 20px;
+  border-bottom:1px solid var(--border);
+}
+.sb-logo .logo { font-size:22px;letter-spacing:4px; }
+
+.sb-profile {
+  padding:20px 24px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+}
+.sb-avatar {
+  width:40px;height:40px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue),var(--green-dark));
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Russo One',sans-serif;font-size:16px;flex-shrink:0;
+}
+.sb-name { font-size:13px;font-weight:600;line-height:1.3; }
+.sb-role { font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-top:1px;display:block; }
+
+.sb-nav { flex:1;padding:16px 0;overflow-y:auto; }
+.sb-nav-item {
+  display:flex;align-items:center;gap:14px;
+  padding:13px 24px; font-size:13px;letter-spacing:1px;
+  color:rgba(240,244,255,0.5); cursor:none;
+  transition:color var(--transition),background var(--transition);
+  position:relative; border:none;background:transparent;width:100%;text-align:left;
+}
+.sb-nav-item .nav-icon { font-size:18px;flex-shrink:0;width:22px;text-align:center; }
+.sb-nav-item:hover { color:var(--white);background:rgba(0,87,255,0.06); }
+.sb-nav-item.active {
+  color:var(--green);background:rgba(0,229,160,0.06);
+}
+.sb-nav-item.active::before {
+  content:'';position:absolute;left:0;top:0;bottom:0;width:3px;
+  background:linear-gradient(to bottom,var(--blue),var(--green));
+  border-radius:0 2px 2px 0;
+}
+.sb-notif-badge {
+  margin-left:auto;background:var(--blue);color:#fff;
+  font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;
+}
+
+.sb-footer {
+  padding:16px 24px;border-top:1px solid var(--border);
+}
+.btn-logout {
+  width:100%;padding:11px;
+  background:rgba(255,50,50,0.08);
+  border:1px solid rgba(255,50,50,0.2);
+  color:rgba(255,100,100,0.8);font-family:'Exo 2',sans-serif;
+  font-size:12px;letter-spacing:2.5px;text-transform:uppercase;
+  cursor:none;transition:background .2s,color .2s,border-color .2s;
+}
+.btn-logout:hover{background:rgba(255,50,50,0.15);color:#ff6464;border-color:rgba(255,50,50,0.4);}
+
+/* MAIN CONTENT */
+.main-content {
+  margin-left:var(--sidebar-w);
+  flex:1;
+  background:var(--black);
+  min-height:100vh;
+  padding:0;
+}
+.main-header {
+  padding:24px 36px;
+  border-bottom:1px solid var(--border);
+  background:rgba(12,16,24,0.95);
+  backdrop-filter:blur(10px);
+  position:sticky;top:0;z-index:100;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.main-header h1 { font-family:'Russo One',sans-serif;font-size:22px;letter-spacing:2px; }
+.main-header .header-sub { font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--green);margin-top:2px;display:block; }
+.header-right { display:flex;gap:12px;align-items:center; }
+.notif-btn {
+  width:38px;height:38px;border-radius:50%;
+  background:rgba(0,87,255,0.1);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;cursor:none;transition:background .2s;
+  position:relative;
+}
+.notif-btn:hover{background:rgba(0,87,255,0.2);}
+.notif-dot { position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 6px var(--green); }
+
+/* SECTION */
+.section { display:none;padding:32px 36px; }
+.section.active { display:block; }
+.section-title { font-family:'Russo One',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:6px; }
+.section-desc { font-size:13px;color:var(--gray);margin-bottom:28px; }
+
+/* FILTER BAR */
+.filter-bar {
+  display:flex;gap:12px;align-items:center;flex-wrap:wrap;
+  margin-bottom:28px;
+  background:var(--black2);
+  border:1px solid var(--border);
+  padding:16px 20px;
+}
+.filter-input, .filter-select {
+  background:rgba(0,87,255,0.06);border:1px solid rgba(0,87,255,0.15);
+  color:var(--white);font-family:'Exo 2',sans-serif;font-size:13px;
+  padding:10px 14px;outline:none;cursor:none;
+  transition:border-color .2s;
+}
+.filter-input { flex:1;min-width:200px; }
+.filter-input:focus,.filter-select:focus{border-color:var(--green);}
+.filter-input::placeholder{color:var(--gray2);}
+.filter-select option{background:var(--black2);}
+
+.date-chips { display:flex;gap:8px;align-items:center;flex-wrap:wrap; }
+.date-chip {
+  padding:8px 14px;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
+  border:1px solid var(--border);background:transparent;color:var(--gray);
+  cursor:none;transition:all .2s;
+}
+.date-chip:hover{border-color:var(--blue);color:var(--white);}
+.date-chip.active{background:linear-gradient(135deg,var(--blue),var(--green-dark));border-color:transparent;color:#fff;}
+
+/* FACILITY GRID */
+.facility-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:20px;
+}
+.facility-card {
+  background:var(--black2);
+  border:1px solid var(--border);
+  overflow:hidden;
+  transition:border-color .25s,transform .25s,box-shadow .25s;
+  cursor:none;
+  position:relative;
+}
+.facility-card:hover {
+  border-color:rgba(0,87,255,0.4);
+  transform:translateY(-4px);
+  box-shadow:0 16px 48px rgba(0,87,255,0.15);
+}
+.fc-image {
+  height:140px;background:linear-gradient(135deg,var(--black3),var(--black2));
+  display:flex;align-items:center;justify-content:center;
+  font-size:56px;position:relative;overflow:hidden;
+}
+.fc-image::after {
+  content:'';position:absolute;bottom:0;left:0;right:0;height:60px;
+  background:linear-gradient(to top,var(--black2),transparent);
+}
+.fc-premium-badge {
+  position:absolute;top:12px;right:12px;
+  background:linear-gradient(135deg,var(--blue),var(--green-dark));
+  font-size:8px;letter-spacing:2px;text-transform:uppercase;
+  padding:4px 10px;color:#fff;z-index:1;
+  clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);
+}
+.fc-body { padding:18px; }
+.fc-title { font-family:'Russo One',sans-serif;font-size:15px;letter-spacing:1px;margin-bottom:6px; }
+.fc-meta { display:flex;justify-content:space-between;align-items:center;margin-bottom:10px; }
+.fc-cat { font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--green); }
+.fc-rating { font-size:11px;color:var(--gray); }
+.fc-rating span{color:#FFD700;} 
+.fc-info-row { display:flex;gap:14px;margin-bottom:14px; }
+.fc-info-item { font-size:11px;color:var(--gray);display:flex;align-items:center;gap:5px; }
+.fc-price { font-family:'Russo One',sans-serif;font-size:18px;margin-bottom:14px; }
+.fc-price span { font-size:11px;font-weight:300;color:var(--gray);font-family:'Exo 2',sans-serif; }
+.btn-book {
+  width:100%;padding:11px;
+  background:linear-gradient(135deg,var(--blue),var(--green-dark));
+  color:#fff;border:none;cursor:none;
+  font-family:'Exo 2',sans-serif;font-weight:700;font-size:12px;letter-spacing:2.5px;text-transform:uppercase;
+  clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);
+  transition:filter .2s,transform .15s;position:relative;overflow:hidden;
+}
+.btn-book::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent);transition:left .35s;}
+.btn-book:hover::after{left:100%;}
+.btn-book:hover{filter:brightness(1.2);}
+.btn-auction {
+  background:linear-gradient(135deg,#7B00FF,var(--blue));
+}
+
+/* MODAL */
+.modal-overlay {
+  position:fixed;inset:0;background:rgba(6,9,16,0.85);
+  backdrop-filter:blur(8px);z-index:500;
+  display:none;align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex;}
+.modal {
+  background:var(--black2);border:1px solid var(--border);
+  width:90%;max-width:540px;max-height:90vh;overflow-y:auto;
+  position:relative;
+  animation:modalIn .3s ease;
+}
+@keyframes modalIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal-header {
+  padding:24px 28px 18px;
+  border-bottom:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.modal-header h3{font-family:'Russo One',sans-serif;font-size:18px;letter-spacing:2px;}
+.modal-close{background:none;border:none;color:var(--gray);font-size:22px;cursor:none;transition:color .2s;}
+.modal-close:hover{color:var(--white);}
+.modal-body{padding:24px 28px;}
+.modal-section-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--green);margin-bottom:12px;}
+.timeslot-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:22px;}
+.timeslot-btn{
+  padding:10px;font-size:12px;letter-spacing:1px;
+  border:1px solid var(--border);background:transparent;color:var(--gray);cursor:none;
+  transition:all .2s;
+}
+.timeslot-btn:hover{border-color:var(--blue);color:var(--white);}
+.timeslot-btn.selected{background:rgba(0,87,255,0.2);border-color:var(--blue);color:var(--white);}
+.timeslot-btn.unavailable{opacity:.3;pointer-events:none;}
+.bid-group{margin-bottom:22px;}
+.bid-group label{display:block;font-size:10px;letter-spacing:3px;text-transform:uppercase;color:rgba(240,244,255,0.3);margin-bottom:8px;}
+.bid-group input{width:100%;background:rgba(0,87,255,0.06);border:1px solid var(--border2);color:var(--white);font-family:'Exo 2',sans-serif;font-size:14px;padding:12px 16px;outline:none;transition:border-color .2s;}
+.bid-group input:focus{border-color:var(--green);}
+.bid-group input::placeholder{color:var(--gray2);}
+
+/* BOOKINGS TABLE */
+.table-wrap{overflow-x:auto;border:1px solid var(--border);}
+.data-table{width:100%;border-collapse:collapse;font-size:13px;}
+.data-table thead tr{background:rgba(0,87,255,0.08);border-bottom:1px solid var(--border);}
+.data-table th{padding:14px 18px;text-align:left;font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--green);font-weight:600;}
+.data-table td{padding:14px 18px;border-bottom:1px solid rgba(0,229,160,0.05);color:rgba(240,244,255,0.7);}
+.data-table tr:hover td{background:rgba(0,87,255,0.04);}
+.badge{display:inline-block;padding:3px 10px;font-size:9px;letter-spacing:2px;text-transform:uppercase;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);}
+.badge-pending{background:rgba(255,165,0,0.15);color:#FFA500;}
+.badge-confirmed{background:rgba(0,229,160,0.12);color:var(--green);}
+.badge-cancelled{background:rgba(255,60,60,0.12);color:#FF6060;}
+.btn-cancel{padding:7px 14px;background:rgba(255,60,60,0.1);border:1px solid rgba(255,60,60,0.25);color:#FF6060;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:none;font-family:'Exo 2',sans-serif;transition:all .2s;}
+.btn-cancel:hover{background:rgba(255,60,60,0.2);border-color:rgba(255,60,60,0.5);}
+.sub-row{display:none;}
+.sub-row.open{display:table-row;}
+.sub-row td{background:rgba(0,87,255,0.04);font-size:12px;color:var(--gray);padding:10px 18px 10px 38px;border-bottom:1px solid var(--border);}
+.expand-btn{background:none;border:none;color:var(--gray);cursor:none;font-size:16px;transition:transform .2s;}
+.expand-btn.open{transform:rotate(90deg);color:var(--green);}
+
+/* AUCTIONS */
+.auction-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;}
+.auction-card{
+  background:var(--black2);border:1px solid rgba(123,0,255,0.2);
+  padding:22px;position:relative;overflow:hidden;
+  transition:border-color .25s,transform .25s;
+}
+.auction-card:hover{border-color:rgba(0,87,255,0.5);transform:translateY(-4px);}
+.auction-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#7B00FF,var(--blue),var(--green));}
+.ac-title{font-family:'Russo One',sans-serif;font-size:15px;letter-spacing:1px;margin-bottom:6px;}
+.ac-slot{font-size:11px;color:var(--gray);margin-bottom:16px;letter-spacing:1px;}
+.ac-bid-row{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:14px;}
+.ac-bid-label{font-size:9px;letter-spacing:2.5px;text-transform:uppercase;color:var(--gray);margin-bottom:4px;}
+.ac-bid-amt{font-family:'Russo One',sans-serif;font-size:22px;background:linear-gradient(90deg,var(--blue),var(--green));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.ac-timer{font-family:'Russo One',sans-serif;font-size:18px;color:#FFA500;text-align:right;}
+.ac-timer-label{font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--gray);text-align:right;}
+.ac-input-row{display:flex;gap:8px;margin-top:14px;}
+.ac-input{flex:1;background:rgba(0,87,255,0.06);border:1px solid rgba(0,87,255,0.2);color:var(--white);font-family:'Exo 2',sans-serif;font-size:13px;padding:10px 12px;outline:none;cursor:none;}
+.ac-input:focus{border-color:var(--green);}
+.ac-input::placeholder{color:var(--gray2);}
+.btn-bid{padding:10px 16px;background:linear-gradient(135deg,#7B00FF,var(--blue));color:#fff;border:none;cursor:none;font-family:'Exo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase;clip-path:polygon(6px 0%,100% 0%,calc(100% - 6px) 100%,0% 100%);transition:filter .2s;}
+.btn-bid:hover{filter:brightness(1.2);}
+
+/* EQUIPMENT */
+.equip-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:20px;}
+.equip-card{background:var(--black2);border:1px solid var(--border);padding:22px;transition:border-color .25s,transform .25s;}
+.equip-card:hover{border-color:rgba(0,229,160,0.3);transform:translateY(-3px);}
+.ec-icon{font-size:42px;margin-bottom:14px;}
+.ec-title{font-family:'Russo One',sans-serif;font-size:15px;letter-spacing:1px;margin-bottom:8px;}
+.ec-rate{font-size:13px;color:var(--gray);margin-bottom:10px;}
+.stock-badge{display:inline-block;padding:4px 10px;font-size:9px;letter-spacing:2px;text-transform:uppercase;clip-path:polygon(4px 0%,100% 0%,calc(100% - 4px) 100%,0% 100%);margin-bottom:16px;}
+.stock-avail{background:rgba(0,229,160,0.12);color:var(--green);}
+.stock-low{background:rgba(255,165,0,0.12);color:#FFA500;}
+.ec-controls{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--border);padding-top:14px;margin-top:4px;}
+.ec-select,.ec-qty{background:rgba(0,87,255,0.05);border:1px solid rgba(0,87,255,0.12);color:var(--white);font-family:'Exo 2',sans-serif;font-size:12px;padding:9px 12px;outline:none;cursor:none;width:100%;}
+.ec-select option{background:var(--black2);}
+.btn-rent{width:100%;padding:11px;background:linear-gradient(135deg,var(--blue),var(--green-dark));color:#fff;border:none;cursor:none;font-family:'Exo 2',sans-serif;font-weight:700;font-size:11px;letter-spacing:2.5px;text-transform:uppercase;clip-path:polygon(8px 0%,100% 0%,calc(100% - 8px) 100%,0% 100%);transition:filter .2s,transform .15s;}
+.btn-rent:hover{filter:brightness(1.2);}
+
+/* NOTIFICATIONS */
+.notif-list{display:flex;flex-direction:column;gap:10px;}
+.notif-item{background:var(--black2);border:1px solid var(--border);border-left:3px solid var(--blue);padding:16px 20px;display:flex;gap:14px;align-items:flex-start;transition:border-color .2s;}
+.notif-item.unread{border-left-color:var(--green);}
+.notif-icon{font-size:20px;flex-shrink:0;margin-top:2px;}
+.notif-text h4{font-size:13px;font-weight:600;margin-bottom:4px;}
+.notif-text p{font-size:12px;color:var(--gray);line-height:1.5;}
+.notif-time{font-size:10px;letter-spacing:1.5px;color:rgba(240,244,255,0.2);margin-left:auto;flex-shrink:0;}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeRight{from{opacity:0;transform:translateY(-50%) translateX(28px)}to{opacity:1;transform:translateY(-50%) translateX(0)}}
+@keyframes scrollAnim{0%,100%{transform:scaleY(.4);transform-origin:top;opacity:.3}50%{transform:scaleY(1);opacity:1}}
+
+.su{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease;}
+.su.vis{opacity:1;transform:translateY(0);}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);}
+  .sidebar.open{transform:translateX(0);}
+  .main-content{margin-left:0;}
+  .land-nav{padding:20px 24px;}
+  .hero-content{padding:0 24px;}
+  .login-section{flex-direction:column;}
+  .login-right{width:100%;border-left:none;border-top:1px solid var(--border);}
+}
+
+</style>
+</head>
+<body>
+
+<div id="cur"></div>
+<div id="curR"></div>
+
+<!-- ══════════════════════════════════════
+     LANDING PAGE
+══════════════════════════════════════ -->
+<div id="landing-page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-bg-img" id="heroBg"></div>
+    <div class="hero-overlay"></div>
+    <div class="hero-grid"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+
+    <!-- NAV -->
+    <nav class="land-nav">
+      <div class="logo">ATHLETIX</div>
+      <div class="nav-actions">
+        <button class="btn-nav-login" onclick="scrollToLogin()">Login</button>
+        <button class="btn-hamburger"><span></span><span></span></button>
+      </div>
+    </nav>
+
+    <!-- HERO CONTENT -->
+    <div class="hero-content">
+      <div class="eyebrow">Book Your Arena</div>
+      <h1 class="hero-h1">
+        PLAY<br>
+        <span class="grad">LIKE A</span><br>
+        CHAMPION
+      </h1>
+      <p class="hero-sub">Premium sports facilities, seamlessly booked. Football, padel, cricket, basketball & more — your game, your schedule.</p>
+      <div class="hero-ctas">
+        <button class="btn-primary" onclick="scrollToLogin()">Book Now</button>
+        <button class="btn-ghost" onclick="scrollToLogin()">View Facilities</button>
+      </div>
+    </div>
+
+    <!-- Side Stat Card -->
+    <div class="hero-stat-card">
+      <span class="hsc-label">Featured Sport</span>
+      <div class="hsc-sport">FOOTBALL</div>
+      <div class="hsc-vs">COURTS</div>
+      <div class="hsc-sport">AVAILABLE</div>
+      <div class="hsc-div"></div>
+      <div class="hsc-stat-row">
+        <div class="hsc-num">12</div>
+        <div class="hsc-lbl">PREMIUM<br>FACILITIES</div>
+      </div>
+    </div>
+
+    <!-- Right watermark -->
+    <div class="hero-right-mark">
+      <div class="mark-big">ATX</div>
+      <div class="mark-sub">The Standard</div>
+    </div>
+
+    <!-- Scroll indicator -->
+    <div class="scroll-ind">
+      <div class="scroll-line"></div>
+      <span>Scroll</span>
+    </div>
+  </section>
+
+  <!-- LOGIN SECTION -->
+  <section class="login-section" id="loginSection">
+    <div class="login-left">
+      <div class="login-eyebrow su">Why Athletix</div>
+      <h2 class="su" style="transition-delay:.1s">
+        YOUR<br><span class="grad">FIELD.</span><br>YOUR RULES.
+      </h2>
+      <p class="su" style="transition-delay:.2s">Instant booking, real-time availability, and world-class facilities. Reserve your slot in under 60 seconds.</p>
+      <div class="feature-list su" style="transition-delay:.3s">
+        <div class="feature-item"><div class="fdot"></div>Football · Padel · Cricket · Basketball</div>
+        <div class="feature-item"><div class="fdot"></div>Real-time slot availability</div>
+        <div class="feature-item"><div class="fdot"></div>Secure online payments</div>
+        <div class="feature-item"><div class="fdot"></div>Live facility auctions for premium slots</div>
+        <div class="feature-item"><div class="fdot"></div>Equipment rentals bundled with bookings</div>
+      </div>
+    </div>
+
+    <div class="login-right">
+      <div class="login-card su" style="transition-delay:.15s">
+        <h3>Sign In</h3>
+        <span class="lc-sub">Welcome back, champion</span>
+        <div class="form-g">
+          <label>Email Address</label>
+          <input type="email" id="login-email" placeholder="you@email.com" />
+        </div>
+        <div class="form-g">
+          <label>Password</label>
+          <input type="password" id="login-password" placeholder="Enter your password" />
+        </div>
+        <button class="btn-submit" id="btn-login-submit" onclick="goToDashboard()">Enter the Arena</button>
+        <div class="form-links">
+          No account? <a href="#">Create one free</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /landing-page -->
+
+
+<!-- ══════════════════════════════════════
+     DASHBOARD PAGE
+══════════════════════════════════════ -->
+<div id="dashboard-page">
+  <div class="dash-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sb-logo">
+        <div class="logo">ATHLETIX</div>
+      </div>
+
+      <div class="sb-profile">
+        <div class="sb-avatar" id="sb-avatar">JD</div>
+        <div>
+          <div class="sb-name" id="sb-name">John Doe</div>
+          <span class="sb-role" id="sb-role">Student</span>
+        </div>
+      </div>
+
+      <nav class="sb-nav">
+        <button class="sb-nav-item active" data-target="facilities">
+          <span class="nav-icon">🏟️</span> Facilities
+        </button>
+        <button class="sb-nav-item" data-target="my-bookings">
+          <span class="nav-icon">📋</span> My Bookings
+        </button>
+        <button class="sb-nav-item" data-target="auctions">
+          <span class="nav-icon">⚡</span> Live Auctions
+        </button>
+        <button class="sb-nav-item" data-target="equipment">
+          <span class="nav-icon">🎾</span> Equipment
+        </button>
+        <button class="sb-nav-item" data-target="notifications">
+          <span class="nav-icon">🔔</span> Notifications
+          <span class="sb-notif-badge" id="notif-count">3</span>
+        </button>
+        <!-- Admin Only -->
+        <button class="sb-nav-item admin-only" data-target="admin" style="display:none; color:var(--accent-blue); background:rgba(0,87,255,0.05); border-top:1px solid rgba(0,87,255,0.1); border-bottom:1px solid rgba(0,87,255,0.1); margin-top:20px;">
+          <span class="nav-icon">🛡️</span> Admin Panel
+        </button>
+      </nav>
+
+      <div class="sb-footer">
+        <button class="btn-logout" onclick="goToLanding()">⏻ Logout</button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      <header class="main-header">
+        <div>
+          <h1 id="section-title">Facilities</h1>
+          <span class="header-sub" id="section-sub">Browse & Book Premium Venues</span>
+        </div>
+        <div class="header-right">
+          <button class="notif-btn" onclick="switchSection('notifications')">
+            🔔<span class="notif-dot"></span>
+          </button>
+        </div>
+      </header>
+
+      <!-- ── ADMIN PANEL ── -->
+      <div class="section" id="section-admin">
+        <div class="section-title">Admin Dashboard</div>
+        <div class="section-desc">System Overview & Management</div>
+        
+        <!-- Stats Cards -->
+        <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:20px; margin-bottom:32px;">
+          <div class="stat-card">
+            <div class="sc-label">Total Users</div>
+            <div class="sc-val" id="stat-users">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-label">Total Bookings</div>
+            <div class="sc-val" id="stat-bookings">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-label">Total Revenue</div>
+            <div class="sc-val" id="stat-rev">Rs 0</div>
+          </div>
+          <div class="stat-card">
+            <div class="sc-label">Equipment Items</div>
+            <div class="sc-val" id="stat-equip">0</div>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:28px;">
+          <!-- Bookings List -->
+          <div class="table-wrap">
+            <div style="font-family:'Russo One',sans-serif; font-size:14px; letter-spacing:1px; margin-bottom:16px;">System Bookings</div>
+            <table class="data-table" id="admin-bookings-table">
+              <thead>
+                <tr>
+                  <th>#BK</th>
+                  <th>User</th>
+                  <th>Facility</th>
+                  <th>Date/Time</th>
+                  <th>Price</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+
+          <!-- Facility Management -->
+          <div class="table-wrap">
+            <div style="font-family:'Russo One',sans-serif; font-size:14px; letter-spacing:1px; margin-bottom:16px;">Add New Facility</div>
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:24px; padding:16px; background:rgba(0,87,255,0.05); border:1px dashed var(--border);">
+              <input type="text" class="af-input" id="new-fac-name" placeholder="Facility Name" style="width:100%" />
+              <div style="display:flex; gap:10px;">
+                <input type="number" class="af-input" id="new-fac-price" placeholder="Price" style="flex:1" />
+                <input type="number" class="af-input" id="new-fac-cap" placeholder="Cap" style="width:60px" />
+                <label style="font-size:10px; color:var(--gray); display:flex; align-items:center; gap:5px;">
+                  <input type="checkbox" id="new-fac-auction" /> Auction?
+                </label>
+              </div>
+              <button class="btn-book" onclick="addFacility()" style="padding:8px; font-size:10px;">Create Facility</button>
+            </div>
+
+            <div style="font-family:'Russo One',sans-serif; font-size:14px; letter-spacing:1px; margin-bottom:16px;">Facility Management</div>
+            <div id="admin-facility-list" style="display:flex; flex-direction:column; gap:12px;">
+              <!-- Dynamically populated -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── FACILITIES ── -->
+      <div class="section active" id="section-facilities">
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+          <input class="filter-input" id="facility-search" type="text" placeholder="🔍  Search facilities..." />
+          <select class="filter-select" id="facility-category">
+            <option value="">All Sports</option>
+            <option>Cricket</option>
+            <option>Football</option>
+            <option>Tennis</option>
+            <option>Basketball</option>
+            <option>Padel</option>
+            <option>Swimming</option>
+          </select>
+          <div class="date-chips">
+            <button class="date-chip active" onclick="selectChip(this)">Today</button>
+            <button class="date-chip" onclick="selectChip(this)">Tomorrow</button>
+            <button class="date-chip" onclick="selectChip(this)">Wed, 30</button>
+            <button class="date-chip" onclick="selectChip(this)">Thu, 1</button>
+            <button class="date-chip" onclick="selectChip(this)">Fri, 2</button>
+          </div>
+        </div>
+
+        <!-- Facility Grid -->
+        <div class="facility-grid" id="facility-grid">
+
+          <div class="facility-card" onclick="openModal('Main Cricket Ground','cricket',false,'Rs 1,200')">
+            <div class="fc-image">🏏</div>
+            <div class="fc-body">
+              <div class="fc-title">Main Cricket Ground</div>
+              <div class="fc-meta">
+                <span class="fc-cat">Cricket</span>
+                <span class="fc-rating"><span>★★★★★</span> 4.9 (128)</span>
+              </div>
+              <div class="fc-info-row">
+                <span class="fc-info-item">👥 22 players</span>
+                <span class="fc-info-item">📍 Block A</span>
+              </div>
+              <div class="fc-price">Rs 1,200 <span>/ hr</span></div>
+              <button class="btn-book" onclick="event.stopPropagation();openModal('Main Cricket Ground','cricket',false,'Rs 1,200')">Book Now</button>
+            </div>
+          </div>
+
+          <div class="facility-card" onclick="openModal('Premium Football Pitch','football',true,'Rs 2,500')">
+            <div class="fc-image">⚽
+              <span class="fc-premium-badge">Premium</span>
+            </div>
+            <div class="fc-body">
+              <div class="fc-title">Premium Football Pitch</div>
+              <div class="fc-meta">
+                <span class="fc-cat">Football</span>
+                <span class="fc-rating"><span>★★★★★</span> 5.0 (204)</span>
+              </div>
+              <div class="fc-info-row">
+                <span class="fc-info-item">👥 22 players</span>
+                <span class="fc-info-item">📍 Block B</span>
+              </div>
+              <div class="fc-price">Rs 2,500 <span>/ hr</span></div>
+              <button class="btn-book btn-auction" onclick="event.stopPropagation();openModal('Premium Football Pitch','football',true,'Rs 2,500')">Start Auction</button>
+            </div>
+          </div>
+
+          <div class="facility-card" onclick="openModal('Indoor Tennis Court','tennis',false,'Rs 900')">
+            <div class="fc-image">🎾</div>
+            <div class="fc-body">
+              <div class="fc-title">Indoor Tennis Court</div>
+              <div class="fc-meta">
+                <span class="fc-cat">Tennis</span>
+                <span class="fc-rating"><span>★★★★</span> 4.7 (87)</span>
+              </div>
+              <div class="fc-info-row">
+                <span class="fc-info-item">👥 4 players</span>
+                <span class="fc-info-item">📍 Block C</span>
+              </div>
+              <div class="fc-price">Rs 900 <span>/ hr</span></div>
+              <button class="btn-book" onclick="event.stopPropagation();openModal('Indoor Tennis Court','tennis',false,'Rs 900')">Book Now</button>
+            </div>
+          </div>
+
+          <div class="facility-card" onclick="openModal('NBA Basketball Court','basketball',false,'Rs 1,500')">
+            <div class="fc-image">🏀</div>
+            <div class="fc-body">
+              <div class="fc-title">NBA Basketball Court</div>
+              <div class="fc-meta">
+                <span class="fc-cat">Basketball</span>
+                <span class="fc-rating"><span>★★★★</span> 4.8 (93)</span>
+              </div>
+              <div class="fc-info-row">
+                <span class="fc-info-item">👥 10 players</span>
+                <span class="fc-info-item">📍 Block A</span>
+              </div>
+              <div class="fc-price">Rs 1,500 <span>/ hr</span></div>
+              <button class="btn-book" onclick="event.stopPropagation();openModal('NBA Basketball Court','basketball',false,'Rs 1,500')">Book Now</button>
+            </div>
+          </div>
+
+          <div class="facility-card" onclick="openModal('Olympic Swimming Pool','swimming',true,'Rs 3,000')">
+            <div class="fc-image">🏊
+              <span class="fc-premium-badge">Premium</span>
+            </div>
+            <div class="fc-body">
+              <div class="fc-title">Olympic Swimming Pool</div>
+              <div class="fc-meta">
+                <span class="fc-cat">Swimming</span>
+                <span class="fc-rating"><span>★★★★★</span> 4.9 (61)</span>
+              </div>
+              <div class="fc-info-row">
+                <span class="fc-info-item">👥 30 swimmers</span>
+                <span class="fc-info-item">📍 Block D</span>
+              </div>
+              <div class="fc-price">Rs 3,000 <span>/ hr</span></div>
+              <button class="btn-book btn-auction" onclick="event.stopPropagation();openModal('Olympic Swimming Pool','swimming',true,'Rs 3,000')">Start Auction</button>
+            </div>
+          </div>
+
+          <div class="facility-card" onclick="openModal('Padel Court 1','padel',false,'Rs 800')">
+            <div class="fc-image">🏸</div>
+            <div class="fc-body">
+              <div class="fc-title">Padel Court 1</div>
+              <div class="fc-meta">
+                <span class="fc-cat">Padel</span>
+                <span class="fc-rating"><span>★★★★</span> 4.6 (44)</span>
+              </div>
+              <div class="fc-info-row">
+                <span class="fc-info-item">👥 4 players</span>
+                <span class="fc-info-item">📍 Block E</span>
+              </div>
+              <div class="fc-price">Rs 800 <span>/ hr</span></div>
+              <button class="btn-book" onclick="event.stopPropagation();openModal('Padel Court 1','padel',false,'Rs 800')">Book Now</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+
+      <!-- ── MY BOOKINGS ── -->
+      <div class="section" id="section-my-bookings">
+        <div class="section-title">My Bookings</div>
+        <div class="section-desc">Track and manage your reservations</div>
+        <div class="table-wrap">
+          <table class="data-table" id="bookings-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th>ID</th>
+                <th>Facility</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Price</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr onclick="toggleSubRow('sub-1',this)">
+                <td><button class="expand-btn" id="exp-sub-1">▶</button></td>
+                <td>#BK-001</td>
+                <td>Main Cricket Ground</td>
+                <td>Apr 29, 2025</td>
+                <td>10:00 – 11:00</td>
+                <td>Rs 1,200</td>
+                <td><span class="badge badge-confirmed">Confirmed</span></td>
+                <td><button class="btn-cancel" onclick="event.stopPropagation();cancelBooking('BK-001')">Cancel</button></td>
+              </tr>
+              <tr class="sub-row" id="sub-1">
+                <td colspan="8">🎾 Equipment: Cricket Bat ×2 · Cricket Ball ×3 · Pads ×2</td>
+              </tr>
+
+              <tr onclick="toggleSubRow('sub-2',this)">
+                <td><button class="expand-btn" id="exp-sub-2">▶</button></td>
+                <td>#BK-002</td>
+                <td>Indoor Tennis Court</td>
+                <td>Apr 30, 2025</td>
+                <td>14:00 – 15:00</td>
+                <td>Rs 900</td>
+                <td><span class="badge badge-pending">Pending</span></td>
+                <td><button class="btn-cancel" onclick="event.stopPropagation();cancelBooking('BK-002')">Cancel</button></td>
+              </tr>
+              <tr class="sub-row" id="sub-2">
+                <td colspan="8">🎾 Equipment: Tennis Rackets ×2 · Tennis Balls ×6</td>
+              </tr>
+
+              <tr onclick="toggleSubRow('sub-3',this)">
+                <td><button class="expand-btn" id="exp-sub-3">▶</button></td>
+                <td>#BK-003</td>
+                <td>Premium Football Pitch</td>
+                <td>Apr 27, 2025</td>
+                <td>18:00 – 19:00</td>
+                <td>Rs 2,500</td>
+                <td><span class="badge badge-cancelled">Cancelled</span></td>
+                <td>—</td>
+              </tr>
+              <tr class="sub-row" id="sub-3">
+                <td colspan="8">No equipment attached.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- ── AUCTIONS ── -->
+      <div class="section" id="section-auctions">
+        <div class="section-title">Live Auctions</div>
+        <div class="section-desc">Bid on premium facilities in real-time</div>
+        <div class="auction-grid" id="auction-grid">
+
+          <div class="auction-card">
+            <div class="ac-title">Premium Football Pitch</div>
+            <div class="ac-slot">📅 Apr 30 · 18:00 – 20:00</div>
+            <div class="ac-bid-row">
+              <div>
+                <div class="ac-bid-label">Current Bid</div>
+                <div class="ac-bid-amt" id="bid-pitch">Rs 3,200</div>
+              </div>
+              <div>
+                <div class="ac-timer-label">Ends In</div>
+                <div class="ac-timer" id="timer-pitch">14:23</div>
+              </div>
+            </div>
+            <div class="ac-input-row">
+              <input class="ac-input" id="bid-input-pitch" type="number" placeholder="Your bid (Rs)" />
+              <button class="btn-bid" onclick="placeBid('pitch','bid-input-pitch','bid-pitch')">Place Bid</button>
+            </div>
+          </div>
+
+          <div class="auction-card">
+            <div class="ac-title">Olympic Swimming Pool</div>
+            <div class="ac-slot">📅 May 1 · 07:00 – 09:00</div>
+            <div class="ac-bid-row">
+              <div>
+                <div class="ac-bid-label">Current Bid</div>
+                <div class="ac-bid-amt" id="bid-pool">Rs 4,100</div>
+              </div>
+              <div>
+                <div class="ac-timer-label">Ends In</div>
+                <div class="ac-timer" id="timer-pool">02:47</div>
+              </div>
+            </div>
+            <div class="ac-input-row">
+              <input class="ac-input" id="bid-input-pool" type="number" placeholder="Your bid (Rs)" />
+              <button class="btn-bid" onclick="placeBid('pool','bid-input-pool','bid-pool')">Place Bid</button>
+            </div>
+          </div>
+
+          <div class="auction-card">
+            <div class="ac-title">Main Cricket Ground</div>
+            <div class="ac-slot">📅 May 2 · 15:00 – 18:00</div>
+            <div class="ac-bid-row">
+              <div>
+                <div class="ac-bid-label">Current Bid</div>
+                <div class="ac-bid-amt" id="bid-cricket">Rs 2,800</div>
+              </div>
+              <div>
+                <div class="ac-timer-label">Ends In</div>
+                <div class="ac-timer" id="timer-cricket">47:11</div>
+              </div>
+            </div>
+            <div class="ac-input-row">
+              <input class="ac-input" id="bid-input-cricket" type="number" placeholder="Your bid (Rs)" />
+              <button class="btn-bid" onclick="placeBid('cricket','bid-input-cricket','bid-cricket')">Place Bid</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── EQUIPMENT ── -->
+      <div class="section" id="section-equipment">
+        <div class="section-title">Equipment Rental</div>
+        <div class="section-desc">Add gear to your active bookings</div>
+        <div class="equip-grid" id="equipment-grid">
+
+          <div class="equip-card">
+            <div class="ec-icon">🏏</div>
+            <div class="ec-title">Cricket Bat</div>
+            <div class="ec-rate">Rs 150 / hr</div>
+            <span class="stock-badge stock-avail">In Stock · 8</span>
+            <div class="ec-controls">
+              <select class="ec-select" id="eq-booking-bat">
+                <option value="">Select Active Booking</option>
+                <option value="BK-001">#BK-001 — Cricket Ground</option>
+                <option value="BK-002">#BK-002 — Tennis Court</option>
+              </select>
+              <input class="ec-qty" type="number" min="1" max="8" value="1" placeholder="Quantity" id="eq-qty-bat"/>
+              <button class="btn-rent" onclick="rentEquipment('Cricket Bat','eq-booking-bat','eq-qty-bat')">Rent Equipment</button>
+            </div>
+          </div>
+
+          <div class="equip-card">
+            <div class="ec-icon">🎾</div>
+            <div class="ec-title">Tennis Racket</div>
+            <div class="ec-rate">Rs 200 / hr</div>
+            <span class="stock-badge stock-avail">In Stock · 12</span>
+            <div class="ec-controls">
+              <select class="ec-select" id="eq-booking-racket">
+                <option value="">Select Active Booking</option>
+                <option value="BK-001">#BK-001 — Cricket Ground</option>
+                <option value="BK-002">#BK-002 — Tennis Court</option>
+              </select>
+              <input class="ec-qty" type="number" min="1" max="12" value="1" id="eq-qty-racket"/>
+              <button class="btn-rent" onclick="rentEquipment('Tennis Racket','eq-booking-racket','eq-qty-racket')">Rent Equipment</button>
+            </div>
+          </div>
+
+          <div class="equip-card">
+            <div class="ec-icon">⚽</div>
+            <div class="ec-title">Football</div>
+            <div class="ec-rate">Rs 100 / hr</div>
+            <span class="stock-badge stock-low">Low Stock · 3</span>
+            <div class="ec-controls">
+              <select class="ec-select" id="eq-booking-ball">
+                <option value="">Select Active Booking</option>
+                <option value="BK-001">#BK-001 — Cricket Ground</option>
+                <option value="BK-002">#BK-002 — Tennis Court</option>
+              </select>
+              <input class="ec-qty" type="number" min="1" max="3" value="1" id="eq-qty-ball"/>
+              <button class="btn-rent" onclick="rentEquipment('Football','eq-booking-ball','eq-qty-ball')">Rent Equipment</button>
+            </div>
+          </div>
+
+          <div class="equip-card">
+            <div class="ec-icon">🏀</div>
+            <div class="ec-title">Basketball</div>
+            <div class="ec-rate">Rs 120 / hr</div>
+            <span class="stock-badge stock-avail">In Stock · 6</span>
+            <div class="ec-controls">
+              <select class="ec-select" id="eq-booking-bball">
+                <option value="">Select Active Booking</option>
+                <option value="BK-001">#BK-001 — Cricket Ground</option>
+                <option value="BK-002">#BK-002 — Tennis Court</option>
+              </select>
+              <input class="ec-qty" type="number" min="1" max="6" value="1" id="eq-qty-bball"/>
+              <button class="btn-rent" onclick="rentEquipment('Basketball','eq-booking-bball','eq-qty-bball')">Rent Equipment</button>
+            </div>
+          </div>
+
+          <div class="equip-card">
+            <div class="ec-icon">🥊</div>
+            <div class="ec-title">Boxing Gloves</div>
+            <div class="ec-rate">Rs 180 / hr</div>
+            <span class="stock-badge stock-avail">In Stock · 10</span>
+            <div class="ec-controls">
+              <select class="ec-select" id="eq-booking-gloves">
+                <option value="">Select Active Booking</option>
+                <option value="BK-001">#BK-001 — Cricket Ground</option>
+                <option value="BK-002">#BK-002 — Tennis Court</option>
+              </select>
+              <input class="ec-qty" type="number" min="1" max="10" value="1" id="eq-qty-gloves"/>
+              <button class="btn-rent" onclick="rentEquipment('Boxing Gloves','eq-booking-gloves','eq-qty-gloves')">Rent Equipment</button>
+            </div>
+          </div>
+
+          <div class="equip-card">
+            <div class="ec-icon">🏊</div>
+            <div class="ec-title">Swim Cap & Goggles</div>
+            <div class="ec-rate">Rs 80 / hr</div>
+            <span class="stock-badge stock-low">Low Stock · 2</span>
+            <div class="ec-controls">
+              <select class="ec-select" id="eq-booking-swim">
+                <option value="">Select Active Booking</option>
+                <option value="BK-001">#BK-001 — Cricket Ground</option>
+                <option value="BK-002">#BK-002 — Tennis Court</option>
+              </select>
+              <input class="ec-qty" type="number" min="1" max="2" value="1" id="eq-qty-swim"/>
+              <button class="btn-rent" onclick="rentEquipment('Swim Gear','eq-booking-swim','eq-qty-swim')">Rent Equipment</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ── NOTIFICATIONS ── -->
+      <div class="section" id="section-notifications">
+        <div class="section-title">Notifications</div>
+        <div class="section-desc">Your latest alerts and updates</div>
+        <div class="notif-list" id="notif-list">
+
+          <div class="notif-item unread">
+            <div class="notif-icon">✅</div>
+            <div class="notif-text">
+              <h4>Booking Confirmed</h4>
+              <p>Your booking for Main Cricket Ground on Apr 29 at 10:00 has been confirmed.</p>
+            </div>
+            <div class="notif-time">2h ago</div>
+          </div>
+
+          <div class="notif-item unread">
+            <div class="notif-icon">⚡</div>
+            <div class="notif-text">
+              <h4>You've Been Outbid!</h4>
+              <p>Someone placed a higher bid of Rs 3,200 on the Premium Football Pitch auction.</p>
+            </div>
+            <div class="notif-time">4h ago</div>
+          </div>
+
+          <div class="notif-item unread">
+            <div class="notif-icon">🔔</div>
+            <div class="notif-text">
+              <h4>Booking Reminder</h4>
+              <p>Your Indoor Tennis Court session starts tomorrow at 14:00. Don't forget your gear!</p>
+            </div>
+            <div class="notif-time">6h ago</div>
+          </div>
+
+          <div class="notif-item">
+            <div class="notif-icon">📋</div>
+            <div class="notif-text">
+              <h4>Booking Cancelled</h4>
+              <p>Your booking #BK-003 for Premium Football Pitch has been cancelled successfully.</p>
+            </div>
+            <div class="notif-time">1d ago</div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div><!-- /dashboard-page -->
+
+
+<!-- BOOKING MODAL -->
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modal-title">Book Facility</h3>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-section-title">Select Timeslot</div>
+      <div class="timeslot-grid" id="modal-slots">
+        <button class="timeslot-btn" onclick="selectSlot(this)">08:00–09:00</button>
+        <button class="timeslot-btn" onclick="selectSlot(this)">09:00–10:00</button>
+        <button class="timeslot-btn unavailable">10:00–11:00</button>
+        <button class="timeslot-btn" onclick="selectSlot(this)">11:00–12:00</button>
+        <button class="timeslot-btn" onclick="selectSlot(this)">14:00–15:00</button>
+        <button class="timeslot-btn unavailable">15:00–16:00</button>
+        <button class="timeslot-btn" onclick="selectSlot(this)">16:00–17:00</button>
+        <button class="timeslot-btn" onclick="selectSlot(this)">18:00–19:00</button>
+        <button class="timeslot-btn" onclick="selectSlot(this)">19:00–20:00</button>
+      </div>
+      <div class="bid-group" id="bid-group" style="display:none">
+        <label>Starting Bid (Rs)</label>
+        <input type="number" id="modal-bid" placeholder="Enter your opening bid..." />
+      </div>
+      <button class="btn-submit" onclick="confirmBooking()">Confirm Booking</button>
+    </div>
+  </div>
+</div>
+
+<script src="/js/hero.js"></script>
+<script src="/js/app.js"></script>
+
+</body>
+</html>
